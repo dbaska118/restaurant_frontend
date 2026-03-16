@@ -10,7 +10,7 @@ function Menu() {
     }
 
     return (
-        <div className="fixed top-0 left-0 z-50  w-full grid grid-cols-5 text-3xl font-serif text-logotext items-center justify-items-center bg-white h-36">
+        <div className="fixed top-0 left-0 z-50  w-full grid grid-cols-5 text-3xl font-serif text-logotext items-center justify-items-center bg-amber-50 h-36 shadow-md">
             <button onClick={() => navigateToPage("/dishes")} className="-mt-10 hover:text-logotexthover hover:underline hover:underline-offset-4 cursor-pointer">
                 MENU
             </button>
@@ -23,7 +23,7 @@ function Menu() {
             <button onClick={() => navigateToPage("/dishes")} className="-mt-10 hover:text-logotexthover hover:underline hover:underline-offset-4 cursor-pointer">
                 KONTAKT
             </button>
-            <button onClick={() => navigateToPage("/dishes")} className="-mt-10 hover:text-logotexthover hover:underline hover:underline-offset-4 cursor-pointer">
+            <button onClick={() => navigateToPage("/dishes")} className="-mt-10 transition-all duration-300 hover:text-logotexthover hover:underline hover:underline-offset-4 cursor-pointer">
                 LOGOWANIE
             </button>
 
