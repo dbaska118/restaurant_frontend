@@ -39,11 +39,11 @@ function DishMenu() {
         <div>
             <Menu/>
             <div className="mx-10 mt-56">
-                <div className="flex gap-5 justify-center mb-16">
-                    <button onClick={() => scrollTo(soupRef)}  className="border-2 p-4 shadow-xl border-logotext bg-amber-50 rounded-3xl w-1/4 text-3xl text-logotext font-serif hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">ZUPY</button>
-                    <button onClick={() => scrollTo(mainDishRef)} className="border-2 p-4 shadow-xl border-logotext bg-amber-50 rounded-3xl w-1/4 text-3xl text-logotext  font-serif hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">DANIA GŁÓWNE</button>
-                    <button onClick={() => scrollTo(dessertRef)} className="border-2 p-4 shadow-xl border-logotext bg-amber-50 rounded-3xl w-1/4 text-3xl text-logotext  font-serif hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">DESERY</button>
-                    <button onClick={() => scrollTo(drinkRef)} className="border-2 p-4 shadow-xl border-logotext bg-amber-50 rounded-3xl w-1/4 text-3xl text-logotext  font-serif hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">NAPOJE</button>
+                <div className="flex gap-5 justify-center mb-16 border-2 border-logotext px-2 py-8">
+                    <button onClick={() => scrollTo(soupRef)}  className="w-1/4 text-3xl text-logotext font-serif hover:text-logotexthover hover:cursor-pointer hover:underline underline-offset-4">ZUPY</button>
+                    <button onClick={() => scrollTo(mainDishRef)} className="w-1/4 text-3xl text-logotext  font-serif hover:text-logotexthover hover:cursor-pointer hover:underline underline-offset-4">DANIA GŁÓWNE</button>
+                    <button onClick={() => scrollTo(dessertRef)} className="rounded-3xl w-1/4 text-3xl text-logotext  font-serif hover:text-logotexthover hover:cursor-pointer hover:underline underline-offset-4 ">DESERY</button>
+                    <button onClick={() => scrollTo(drinkRef)} className="w-1/4 text-3xl text-logotext  font-serif hover:text-logotexthover hover:cursor-pointer hover:underline underline-offset-4 ">NAPOJE</button>
                 </div>
                 <div ref={soupRef} className="h-[30vh] w-full bg-[url('/soup.jpg')] bg-fixed bg-center bg-cover relative flex items-center justify-center">
                     <div className="absolute inset-0 bg-black/50"></div>

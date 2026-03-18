@@ -8,21 +8,21 @@ function Contact() {
     const [message, setMessage] = useState("");
 
 
-    const sendMessage = () => {
-
+    const sendMessage = (e) => {
+        e.preventDefault();
         if(message === "" || topic === "" || email === "") {
             toast.error("Nie uzupełniono wszystkich pól!", {
                 className: 'min-w-[450px]',
             });
         }
         else {
+            setEmail("")
+            setMessage("")
+            setTopic("")
             toast.success("Wysłano wiadomość!", {
                 className: 'min-w-[450px]',
             });
         }
-        setEmail("")
-        setMessage("")
-        setTopic("")
     }
 
     return (
@@ -51,36 +51,38 @@ function Contact() {
                         <p>kontakt@palac-smaku.pl</p>
 
                     </div>
-                    <div className="flex flex-col text-2xl">
-                        <label>Adres e-mail:</label>
-                        <input
-                            className="border-2 border-logotext rounded-xl p-2 text-xl mt-1 mb-4 outline-none focus:border-logotexthover"
-                            type="email"
-                            name="email"
-                            placeholder="Adres e-mail"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)} />
+                    <form onSubmit={sendMessage}>
+                        <div className="flex flex-col text-2xl">
+                            <label>Adres e-mail:</label>
+                            <input
+                                className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-4 outline-none focus:border-logotexthover"
+                                type="text"
+                                name="email"
+                                placeholder="Adres e-mail"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)} />
 
-                        <label>Temat:</label>
-                        <input
-                            className="border-2 border-logotext rounded-xl p-2 text-xl mt-1 mb-4 outline-none focus:border-logotexthover"
-                            type="text"
-                            name="topic"
-                            placeholder="Temat"
-                            value={topic}
-                            onChange={(e) => setTopic(e.target.value)} />
+                            <label>Temat:</label>
+                            <input
+                                className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-4 outline-none focus:border-logotexthover"
+                                type="text"
+                                name="topic"
+                                placeholder="Temat"
+                                value={topic}
+                                onChange={(e) => setTopic(e.target.value)} />
 
-                        <label>Wiadomość:</label>
-                        <textarea
-                            className="border-2 border-logotext rounded-xl p-2 text-xl mt-1 mb-10 outline-none focus:border-logotexthover"
-                            name="message"
-                            value={message}
-                            rows={5}
-                            placeholder="Twoja wiadomość"
-                            onChange={(e) => setMessage(e.target.value)} />
+                            <label>Wiadomość:</label>
+                            <textarea
+                                className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-10 outline-none focus:border-logotexthover"
+                                name="message"
+                                value={message}
+                                rows={5}
+                                placeholder="Twoja wiadomość"
+                                onChange={(e) => setMessage(e.target.value)} />
 
-                        <button onClick={() => sendMessage()}  className="border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext font-serif hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Wyślij wiadomość</button>
-                    </div>
+                            <button type="submit"  className="border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Wyślij wiadomość</button>
+                        </div>
+                    </form>
                 </div>
                 <iframe
                     className="w-full h-[500px]"

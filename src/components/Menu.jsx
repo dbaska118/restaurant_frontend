@@ -23,7 +23,7 @@ function Menu() {
             <button onClick={() => navigateToPage("/contact")} className="-mt-10 hover:text-logotexthover hover:underline hover:underline-offset-4 cursor-pointer">
                 KONTAKT
             </button>
-            <button onClick={() => navigateToPage("/dishes")} className="-mt-10 transition-all duration-300 hover:text-logotexthover hover:underline hover:underline-offset-4 cursor-pointer">
+            <button onClick={() => navigateToPage("/login")} className="-mt-10 transition-all duration-300 hover:text-logotexthover hover:underline hover:underline-offset-4 cursor-pointer">
                 LOGOWANIE
             </button>
 
