@@ -1,5 +1,7 @@
 import React from "react";
 import {useNavigate} from "react-router-dom";
+import {registerUser} from "../api/authAPI.js";
+import {toast, ToastContainer} from "react-toastify";
 
 function Register() {
     const [registerData, setRegisterData] = React.useState({
@@ -21,21 +23,37 @@ function Register() {
         setRegisterData(prev => ({ ...prev, [name]: value }));
     }
 
-    const sendRegisterData = (e) => {
+    const sendRegisterData = async (e) => {
         e.preventDefault();
-        console.log(registerData);
-        setRegisterData({
-            email: "",
-            password: "",
-            firstName: "",
-            lastName: "",
-            type: "client"
-        })
+        try {
+            await registerUser(registerData);
+            toast.success("Konto zostało stworzone!", {
+                className: 'min-w-[450px]',
+            });
+            setRegisterData({
+                email: "",
+                password: "",
+                firstName: "",
+                lastName: "",
+                type: "client"
+            })
+        } catch (error) {
+            if(error.status === 409){
+                toast.error("Istnieje już konto z takim adresem e-mail!", {
+                    className: 'min-w-[450px]',
+                });
+            }
+            else {
+                toast.error("Błąd tworzenia konta!", {
+                    className: 'min-w-[450px]',
+                });
+            }
+        }
     }
 
     return (
         <div className="relative w-full h-screen flex items-center justify-center">
-
+            <ToastContainer position="top-center" className="text-xl" autoClose={3000} theme="light"/>
             <div className="absolute inset-0 bg-repeat bg-[url('/utensils-crossed.svg')] z-0"></div>
             <form className="w-full max-w-[750px]" onSubmit={sendRegisterData}>
                 <div className="relative z-10 bg-white flex flex-col border-3  border-logotext rounded-xl py-6 px-12 text-2xl">
