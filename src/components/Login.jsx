@@ -5,6 +5,7 @@ function Login() {
     const [loginData, setLoginData] = React.useState({
         email: "",
         password: "",
+        logout: false,
     })
     const navigate = useNavigate();
 
@@ -24,6 +25,7 @@ function Login() {
         setLoginData({
             email: "",
             password: "",
+            logout: false,
         })
     }
 
@@ -31,7 +33,7 @@ function Login() {
         <div className="relative w-full h-screen flex items-center justify-center">
 
             <div className="absolute inset-0 bg-repeat bg-[url('/utensils-crossed.svg')] z-0"></div>
-            <form className="w-1/3" onSubmit={sendLoginData}>
+            <form className="w-full max-w-[750px]" onSubmit={sendLoginData}>
                 <div className="relative z-10 bg-white flex flex-col border-3  border-logotext rounded-xl py-6 px-12 text-2xl">
                     <div className="flex justify-center ">
                         <button type="button" onClick={() => navigateToPage("/")}>
@@ -49,13 +51,23 @@ function Login() {
                     />
                     <label>Hasło:</label>
                     <input
-                        className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-10 outline-none focus:border-logotexthover"
+                        className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-4 outline-none focus:border-logotexthover"
                         type="password"
                         name="password"
                         placeholder="************"
                         value={loginData.password}
                         onChange={handleChange}
                     />
+                    <div className="flex justify-center items-center gap-2 mb-10">
+                        <label>Nie wylogowuj mnie</label>
+                        <input
+                            type="checkbox"
+                            className="w-5 h-5 cursor-pointer mt-1.5"
+                            name="logout"
+                            checked={loginData.logout}
+                            onChange={(e) => setLoginData(prev => ({ ...prev, logout: e.target.checked }))}
+                        />
+                    </div>
                     <button type="submit"  className="border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Zaloguj się</button>
                     <div className="flex gap-2 justify-center mt-8">
                         <p>Nie masz jeszcze konta?</p>
