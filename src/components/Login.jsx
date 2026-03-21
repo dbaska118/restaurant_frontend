@@ -1,5 +1,8 @@
 import React from "react";
 import {useNavigate} from "react-router-dom";
+import {useAuth} from "../AuthContext.jsx";
+import {toast, ToastContainer} from "react-toastify";
+import {loginUser} from "../api/authAPI.js";
 
 function Login() {
     const [loginData, setLoginData] = React.useState({
@@ -8,6 +11,7 @@ function Login() {
         logout: false,
     })
     const navigate = useNavigate();
+    const {login} = useAuth();
 
     const navigateToPage = (source) => {
         window.scroll(0, 0)
@@ -19,19 +23,34 @@ function Login() {
         setLoginData(prev => ({ ...prev, [name]: value }));
     }
 
-    const sendLoginData = (e) => {
+    const sendLoginData = async (e) => {
         e.preventDefault();
-        console.log(loginData);
-        setLoginData({
-            email: "",
-            password: "",
-            logout: false,
-        })
+        try {
+            const response = await loginUser(loginData);
+            login(response)
+            toast.success("Zalogowano pomyślnie", {
+                className: 'min-w-[450px]',
+            });
+            setTimeout(() => {
+                navigate("/");
+            }, 1500);
+        } catch (error) {
+            console.log(error);
+            toast.error("Niepoprawne dane logowania!", {
+                className: 'min-w-[450px]',
+            });
+            setLoginData({
+                email: "",
+                password: "",
+                logout: false,
+            })
+        }
+
     }
 
     return (
         <div className="relative w-full h-screen flex items-center justify-center">
-
+            <ToastContainer position="top-center" className="text-xl" autoClose={3000} theme="light"/>
             <div className="absolute inset-0 bg-repeat bg-[url('/utensils-crossed.svg')] z-0"></div>
             <form className="w-full max-w-[750px]" onSubmit={sendLoginData}>
                 <div className="relative z-10 bg-white flex flex-col border-3  border-logotext rounded-xl py-6 px-12 text-2xl">

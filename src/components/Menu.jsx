@@ -1,12 +1,24 @@
 import React from "react";
 import {useNavigate} from "react-router-dom";
+import {logout} from "../api/authAPI.js";
+import {useAuth} from "../AuthContext.jsx";
 
 function Menu() {
     const navigate = useNavigate();
+    const { accessToken, user } = useAuth()
 
     const navigateToPage = (source) => {
         window.scroll(0, 0)
         navigate(source);
+    }
+
+    const AccountClick = async () => {
+        if(!accessToken || !user) {
+            navigate("/login");
+        }
+        else {
+           navigate("/userpanel");
+        }
     }
 
     return (
@@ -23,7 +35,7 @@ function Menu() {
             <button onClick={() => navigateToPage("/contact")} className="-mt-10 hover:text-logotexthover hover:underline hover:underline-offset-4 cursor-pointer">
                 KONTAKT
             </button>
-            <button onClick={() => navigateToPage("/login")} className="-mt-10 transition-all duration-300 hover:text-logotexthover hover:underline hover:underline-offset-4 cursor-pointer">
+            <button onClick={() => AccountClick()} className="-mt-10 transition-all duration-300 hover:text-logotexthover hover:underline hover:underline-offset-4 cursor-pointer">
                 LOGOWANIE
             </button>
 
