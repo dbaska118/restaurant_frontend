@@ -36,7 +36,7 @@ function Menu() {
                 KONTAKT
             </button>
             <button onClick={() => AccountClick()} className="-mt-10 transition-all duration-300 hover:text-logotexthover hover:underline hover:underline-offset-4 cursor-pointer">
-                LOGOWANIE
+                MOJE KONTO
             </button>
 
         </div>
