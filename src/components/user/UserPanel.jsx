@@ -1,5 +1,5 @@
-import Menu from "./Menu.jsx";
-import ProfileButtons  from "./ProfileButtons.jsx";
+import Menu from "../Menu.jsx";
+import ProfileButtons  from "../ProfileButtons.jsx";
 import React from "react";
 import {Ban, CirclePlus} from "lucide-react"
 import {useNavigate} from "react-router-dom";

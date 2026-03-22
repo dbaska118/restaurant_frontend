@@ -1,6 +1,5 @@
 import React from "react";
 import {useNavigate} from "react-router-dom";
-import {logout} from "../api/authAPI.js";
 import {useAuth} from "../AuthContext.jsx";
 
 function Menu() {
@@ -16,8 +15,11 @@ function Menu() {
         if(!accessToken || !user) {
             navigate("/login");
         }
-        else {
+        else if(user.role === "client"){
            navigate("/userpanel");
+        }
+        else if(user.role === "admin" || user.role === "headAdmin"){
+            navigate("/adminpanel");
         }
     }
 
