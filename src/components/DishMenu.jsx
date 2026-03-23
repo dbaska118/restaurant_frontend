@@ -53,7 +53,7 @@ function DishMenu() {
                 </div>
                 <div className="flex flex-col items-center w-full mt-10 mb-20">
                     {soup.map((dish, index) => (
-                        <div className="w-2/3 flex-col">
+                        <div key={dish.id} className="w-2/3 flex-col">
                             <div className="flex justify-between">
                                 <h3 className="text-3xl font-semibold text-logotext">{index+1}. {dish.name}</h3>
                                 <h3 className="text-2xl font-semibold text-logotexthover">{Number(dish.price).toFixed(2)} zł</h3>
@@ -70,7 +70,7 @@ function DishMenu() {
                 </div>
                 <div className="flex flex-col items-center w-full mt-10 mb-20">
                     {mainDish.map((dish, index) => (
-                        <div className="w-2/3 flex-col">
+                        <div key={dish.id} className="w-2/3 flex-col">
                             <div className="flex justify-between">
                                 <h3 className="text-3xl font-semibold text-logotext">{index+1}. {dish.name}</h3>
                                 <h3 className="text-2xl font-semibold text-logotexthover">{Number(dish.price).toFixed(2)} zł</h3>
@@ -87,7 +87,7 @@ function DishMenu() {
                 </div>
                 <div className="flex flex-col items-center w-full mt-10 mb-20">
                     {dessert.map((dish, index) => (
-                        <div className="w-2/3 flex-col">
+                        <div key={dish.id} className="w-2/3 flex-col">
                             <div className="flex justify-between">
                                 <h3 className="text-3xl font-semibold text-logotext">{index+1}. {dish.name}</h3>
                                 <h3 className="text-2xl font-semibold text-logotexthover">{Number(dish.price).toFixed(2)} zł</h3>
@@ -104,7 +104,7 @@ function DishMenu() {
                 </div>
                 <div className="flex flex-col items-center w-full mt-10 mb-20">
                     {drink.map((dish, index) => (
-                        <div className="w-2/3 flex-col">
+                        <div key={dish.id} className="w-2/3 flex-col">
                             <div className="flex justify-between">
                                 <h3 className="text-3xl font-semibold text-logotext">{index+1}. {dish.name}</h3>
                                 <h3 className="text-2xl font-semibold text-logotexthover">{Number(dish.price).toFixed(2)} zł</h3>
