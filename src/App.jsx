@@ -8,6 +8,7 @@ import Register from "./components/Register.jsx";
 import UserPanel from "./components/user/UserPanel.jsx";
 import AdminPanel from "./components/admin/AdminPanel.jsx";
 import DishEdit from "./components/admin/DishEdit.jsx";
+import ChangePassword from "./components/ChangePassword.jsx";
 import {AuthProvider} from "./AuthContext.jsx";
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/changePassword" element={<ChangePassword />} />
                     <Route path="/userpanel" element={<UserPanel/>} />
                     <Route path="/adminpanel" element={<AdminPanel/>} />
                     <Route path="/admin/dishes" element={<DishEdit/>} />

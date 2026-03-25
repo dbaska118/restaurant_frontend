@@ -24,7 +24,7 @@ function ProfileButtons() {
                 <Settings className="w-7 h-7"/>
                 <p>Edycja profilu</p>
             </button>
-            <button className="flex justify-center items-center gap-2 cursor-pointer hover:text-logotexthover" onClick={handleLogout}>
+            <button className="flex justify-center items-center gap-2 cursor-pointer hover:text-logotexthover" onClick={() => navigate("/changePassword")}>
                 <SquareAsterisk className="w-7 h-7"/>
                 <p>Zmiana hasła</p>
             </button>
