@@ -22,6 +22,8 @@ function UserPanel() {
     }
 
     useEffect(() => {
+        if (!user?.email) return;
+
        getClientBalance(user.email)
             .then((response) => {
                setBalance(response);
@@ -30,9 +32,11 @@ function UserPanel() {
                 console.log(error)
                 setBalance(undefined);
             })
-    }, [user.email])
+    }, [user?.email])
 
     useEffect(() => {
+        if (!user?.email) return;
+
         getName(user.email)
             .then((response) => {
                 setName(response);
@@ -41,7 +45,7 @@ function UserPanel() {
                 console.log(error)
                 setName(undefined);
             })
-    }, [user.email])
+    }, [user?.email])
 
     return (
         <div>
