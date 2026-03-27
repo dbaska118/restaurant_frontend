@@ -17,7 +17,6 @@ function DishMenu() {
     useEffect(() => {
         getAllDishes()
             .then((response) => {
-                console.log(response);
                 setSoup(response.filter(dish => dish.dishType === "SOUP"))
                 setMainDish(response.filter(dish => dish.dishType === "MAIN"))
                 setDessert(response.filter(dish => dish.dishType === "DESSERT"))

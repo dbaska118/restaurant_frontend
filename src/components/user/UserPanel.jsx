@@ -1,26 +1,54 @@
 import Menu from "../Menu.jsx";
 import ProfileButtons  from "../ProfileButtons.jsx";
-import React from "react";
+import React, {useEffect} from "react";
 import {Ban, CirclePlus} from "lucide-react"
 import {useNavigate} from "react-router-dom";
+import {getAllDishes} from "../../api/dishAPI.js";
+import {useAuth} from "../../AuthContext.jsx";
+import {getClientBalance, getName} from "../../api/userAPI.js";
 
 function UserPanel() {
     const [reservations, setReservations] = React.useState([]);
     const [balanceOperations, setBalanceOperations] = React.useState([]);
     const [balance, setBalance] = React.useState(0);
     const navigate = useNavigate();
+    const {user} = useAuth()
+    const [name, setName] = React.useState({});
+
 
     const navigateToPage = (source) => {
         window.scroll(0, 0)
         navigate(source);
     }
 
+    useEffect(() => {
+       getClientBalance(user.email)
+            .then((response) => {
+               setBalance(response);
+            })
+            .catch((error) => {
+                console.log(error)
+                setBalance(undefined);
+            })
+    }, [user.email])
+
+    useEffect(() => {
+        getName(user.email)
+            .then((response) => {
+                setName(response);
+            })
+            .catch((error) => {
+                console.log(error)
+                setName(undefined);
+            })
+    }, [user.email])
+
     return (
         <div>
             <Menu/>
             <div className="mt-52 mx-10">
                 <div className="flex justify-between">
-                    <h2 className="text-4xl font-semibold">Panel klienta</h2>
+                    <h2 className="text-4xl font-semibold">{name === undefined ? 'Błąd pobrania imienia i nazwiska!' : `Witaj, ${name.firstName} ${name.lastName}!`}</h2>
                     <ProfileButtons />
                 </div>
                 <div className="grid grid-cols-2 gap-24 justify-between mx-10 mt-10">
@@ -40,7 +68,7 @@ function UserPanel() {
                     </div>
                     <div>
                         <div className="flex justify-between border-b w-full pb-4 pl-4">
-                            <p className="text-3xl">Saldo <b>{Number(balance).toFixed(2)} zł</b></p>
+                            <p className="text-3xl">Saldo <b>{balance === undefined ? "Błąd pobrania salda" : `${Number(balance).toFixed(2)} zł`}</b></p>
                             <button className="flex text-3xl justify-center items-center gap-2 cursor-pointer hover:text-logotexthover">
                                 <CirclePlus className="w-7 h-7"/>
                                 <p>Dodaj środki</p>
