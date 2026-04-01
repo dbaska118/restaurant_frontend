@@ -59,3 +59,25 @@ export const addAdmin = async (data) => {
         throw error;
     }
 }
+
+export const getUsers = async () => {
+    try {
+        const response = await api.get("/user");
+        return response.data;
+    }
+    catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const getAllUsers = async () => {
+    try {
+        const response = await api.get("/user/headAdmin");
+        return response.data;
+    }
+    catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
