@@ -11,6 +11,7 @@ import DishEdit from "./components/admin/DishEdit.jsx";
 import ChangePassword from "./components/ChangePassword.jsx";
 import ChangeName from "./components/ChangeName.jsx";
 import {AuthProvider} from "./AuthContext.jsx";
+import UserEdit from "./components/admin/UserEdit.jsx";
 
 function App() {
     return (
@@ -27,6 +28,7 @@ function App() {
                     <Route path="/userpanel" element={<UserPanel/>} />
                     <Route path="/adminpanel" element={<AdminPanel/>} />
                     <Route path="/admin/dishes" element={<DishEdit/>} />
+                    <Route path="/admin/users" element={<UserEdit/>} />
                 </Routes>
             </Router>
         </AuthProvider>

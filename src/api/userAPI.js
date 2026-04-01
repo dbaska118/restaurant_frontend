@@ -39,3 +39,23 @@ export const changeName = async (data) => {
         throw error;
     }
 }
+
+export const addUser = async (data) => {
+    try {
+        const response = await api.post("/user", data);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const addAdmin = async (data) => {
+    try {
+        const response = await api.post("/user/headAdmin", data);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
