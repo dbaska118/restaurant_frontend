@@ -2,7 +2,7 @@ import Menu from "../Menu.jsx";
 import {toast, ToastContainer} from "react-toastify";
 import React, {useEffect} from "react";
 import {useAuth} from "../../AuthContext.jsx";
-import {addUser, addAdmin, getUsers, getAllUsers, getName} from "../../api/userAPI.js";
+import {addUser, addAdmin, getUsers, getAllUsers, deleteUser, deleteAdmin, putAdmin, putUser} from "../../api/userAPI.js";
 import {Ban, NotebookPen, SearchCheck, Trash} from "lucide-react";
 
 
@@ -29,7 +29,7 @@ const UserSelection = ({users, title, search, handleDelete, handleEdit}) => {
         <div className="mt-16">
             <h1 className="text-4xl font-semibold text-center mb-5">{title}</h1>
             {showUsers.map(user => (
-                <div key={user.id} className="flex justify-between items-center border-b-1 pb-4 mb-8 border-gray-600">
+                <div key={user.id} className="flex justify-between items-center border-b-1 pb-4 mb-8 border-gray-600 pt-2">
                     <div className="grid grid-cols-[350px_150px_450px] gap-5">
                         <p className="font-semibold text-logotext truncate">{user.email}</p>
                         <p>{user.firstName}</p>
@@ -97,17 +97,129 @@ function UserEdit() {
     }
 
     const handleEdit = async (user) => {
-        console.log("Edit", user)
+        console.log(user)
+        setEditMode(true);
+        setFormData(user)
+        window.scroll(0, 0)
     }
 
     const handleDelete = async (user) => {
-        console.log("Delete", user)
+        if(user.role === "admin") {
+            try {
+                const response = await deleteAdmin(user.id)
+                setAdmins(prevState => prevState.filter(user => user.id !== response.id));
+                toast.success("Usnięto konto administratora!", {
+                    className: 'min-w-[450px]',
+                });
+            } catch(error) {
+                console.log(error)
+                if(error.response.status === 404) {
+                    toast.error("Nie znaleziono konta administratora!", {
+                        className: 'min-w-[450px]',
+                    });
+                }
+                else {
+                    toast.error("Błąd usunięcia konta administratora!", {
+                        className: 'min-w-[450px]',
+                    });
+                }
+            }
+        }
+        else {
+            try {
+                const response = await deleteUser(user.id)
+                if(response.type === "client") {
+                    setClients(prevState => prevState.filter(user => user.id !== response.id));
+                }
+                else {
+                    setEmployees(prevState => prevState.filter(user => user.id !== response.id));
+                }
+                toast.success("Usnięto konto użytkownika!", {
+                    className: 'min-w-[450px]',
+                });
+            } catch(error) {
+                console.log(error)
+                if(error.response.status === 404) {
+                    toast.error("Nie znaleziono konta użytkownika!", {
+                        className: 'min-w-[450px]',
+                    });
+                }
+                else {
+                    toast.error("Błąd usunięcia konta użytkownika!", {
+                        className: 'min-w-[450px]',
+                    });
+                }
+            }
+        }
+    }
+
+    const cancelEdit = () => {
+        setEditMode(false);
+        setFormData({
+            email: "",
+            password: "",
+            firstName: "",
+            lastName: "",
+            type: "client"
+        });
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if(editMode) {
-
+            if(formData.type === "admin") {
+                try {
+                    const response = await putAdmin(formData.id, formData);
+                    setAdmins(prevState => prevState.filter(user => user.id !== response.id));
+                    setAdmins(prevState => [...prevState, response]);
+                    toast.success("Edytowano konto administratora!", {
+                        className: 'min-w-[450px]',
+                    });
+                } catch (error) {
+                    console.log(error);
+                    if(error.status === 404) {
+                        toast.error("Nie znaleziono konta administratora!", {
+                            className: 'min-w-[450px]',
+                        });
+                    }
+                    else {
+                        toast.error("Błąd edycji konta administratora!", {
+                            className: 'min-w-[450px]',
+                        });
+                    }
+                    return;
+                }
+            }
+            else {
+                try {
+                    const response = await putUser(formData.id, formData);
+                    if(response.type === "client") {
+                        setClients(prevState => prevState.filter(user => user.id !== response.id));
+                        setClients(prevState => [...prevState, response]);
+                    }
+                    else if(response.type === "employee") {
+                        setEmployees(prevState => prevState.filter(user => user.id !== response.id));
+                        setEmployees(prevState => [...prevState, response]);
+                    }
+                    toast.success("Edytowano konto użytkownika!", {
+                        className: 'min-w-[450px]',
+                    });
+                } catch (error) {
+                    console.log(error);
+                    if(error.status === 404) {
+                        toast.error("Nie znaleziono konta użytkownika!", {
+                            className: 'min-w-[450px]',
+                        });
+                    }
+                    else {
+                        toast.error("Błąd edycji konta administratora!", {
+                            className: 'min-w-[450px]',
+                        });
+                    }
+                    return;
+                }
+            }
+            setEditMode(false);
         }
         else {
             if(formData.type === "admin") {
@@ -182,15 +294,28 @@ function UserEdit() {
                             <div className="grid grid-cols-2 gap-10">
                                 <div className="flex flex-col">
                                     <label>Adres e-mail:</label>
-                                    <input
-                                        className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-2 outline-none focus:border-logotexthover"
-                                        type="text"
-                                        name="email"
-                                        placeholder="Adres e-mail"
-                                        value={formData.email}
-                                        onChange={handleChange}
+                                    {editMode && (
+                                        <input
+                                            className="border-2 border-logotext rounded-xl p-3 text-xl text-gray-600 mt-1 mb-2 outline-none focus:border-logotexthover"
+                                            type="text"
+                                            name="email"
+                                            placeholder="Adres e-mail"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            readOnly={true}
+                                        />
+                                    )}
+                                    {!editMode && (
+                                        <input
+                                            className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-2 outline-none focus:border-logotexthover"
+                                            type="text"
+                                            name="email"
+                                            placeholder="Adres e-mail"
+                                            value={formData.email}
+                                            onChange={handleChange}
 
-                                    />
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col">
                                     <label>Haslo:</label>
@@ -227,24 +352,36 @@ function UserEdit() {
                                 </div>
                                 <div className="flex flex-col">
                                     <label>Rola:</label>
-                                    <select
-                                        className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-2 outline-none focus:border-logotexthover"
-                                        value={formData.type}
-                                        onChange={handleChange}
-                                        name="type"
-                                    >
-                                        <option value="client">Klient</option>
-                                        <option value="employee">Pracownik</option>
-                                        {user.role === "headAdmin" && (
-                                            <option value="admin">Administrator</option>
-                                        )}
-                                    </select>
+                                    {editMode && (
+                                        <input
+                                            className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-2 outline-none focus:border-logotexthover"
+                                            type="text"
+                                            name="type"
+                                            value={formData.type === "client" ? "Klient" : formData.type === "employee" ? "Pracownik" : "Administrator"}
+                                            readOnly={true}
+                                        />
+                                    )}
+                                    {!editMode && (
+                                        <select
+                                            className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-2 outline-none focus:border-logotexthover"
+                                            value={formData.type}
+                                            onChange={handleChange}
+                                            name="type"
+                                        >
+                                            <option value="client">Klient</option>
+                                            <option value="employee">Pracownik</option>
+                                            {user.role === "headAdmin" && (
+                                                <option value="admin">Administrator</option>
+                                            )}
+                                        </select>
+                                    )}
+
                                 </div>
                                 <div className="col-span-2 flex items-center justify-center">
                                     {editMode && (
                                         <div className="flex gap-10 w-full">
                                             <button type="submit"  className="w-full border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Edytuj użytkownika</button>
-                                            <button type="button" className="w-full border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Anuluj edycję</button>
+                                            <button type="button" onClick={() => cancelEdit()} className="w-full border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Anuluj edycję</button>
                                         </div>
                                     )}
                                     {!editMode && (

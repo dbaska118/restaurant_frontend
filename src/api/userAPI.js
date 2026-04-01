@@ -81,3 +81,47 @@ export const getAllUsers = async () => {
         throw error;
     }
 }
+
+export const deleteUser = async (id) => {
+    try {
+        const response = await api.delete(`/user/${id}`);
+        return response.data;
+    }
+    catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const deleteAdmin = async (id) => {
+    try {
+        const response = await api.delete(`/user/headAdmin/${id}`);
+        return response.data;
+    }
+    catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const putUser = async (id, data) => {
+    try {
+        const response = await api.put(`/user/${id}`, data);
+        return response.data;
+    }
+    catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const putAdmin = async (id, data) => {
+    try {
+        const response = await api.put(`/user/headAdmin/${id}`, data);
+        return response.data;
+    }
+    catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
