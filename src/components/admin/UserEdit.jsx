@@ -102,7 +102,6 @@ function UserEdit() {
         setFormData(user)
         window.scroll(0, 0)
     }
-
     const handleDelete = async (user) => {
         if(user.role === "admin") {
             try {

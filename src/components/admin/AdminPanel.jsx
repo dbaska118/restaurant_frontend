@@ -24,6 +24,7 @@ function AdminPanel() {
                 <div>
                     <button onClick={() => navigateToPage("/admin/dishes")}>Karta dań</button>
                     <button onClick={() => navigateToPage("/admin/users")}>Użytkownicy</button>
+                    <button onClick={() => navigateToPage("/admin/openingHours")}>Godziny otwarcia</button>
                 </div>
             </div>
         </div>

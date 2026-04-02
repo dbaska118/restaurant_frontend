@@ -12,6 +12,7 @@ import ChangePassword from "./components/ChangePassword.jsx";
 import ChangeName from "./components/ChangeName.jsx";
 import {AuthProvider} from "./AuthContext.jsx";
 import UserEdit from "./components/admin/UserEdit.jsx";
+import OpeningHours from "./components/admin/OpeningHours.jsx";
 
 function App() {
     return (
@@ -29,6 +30,7 @@ function App() {
                     <Route path="/adminpanel" element={<AdminPanel/>} />
                     <Route path="/admin/dishes" element={<DishEdit/>} />
                     <Route path="/admin/users" element={<UserEdit/>} />
+                    <Route path="/admin/openingHours" element={<OpeningHours/>} />
                 </Routes>
             </Router>
         </AuthProvider>
