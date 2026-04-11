@@ -3,10 +3,9 @@ import ProfileButtons  from "../ProfileButtons.jsx";
 import React, {useEffect} from "react";
 import {Ban, CirclePlus} from "lucide-react"
 import {useNavigate} from "react-router-dom";
-import {getAllDishes} from "../../api/dishAPI.js";
 import {useAuth} from "../../AuthContext.jsx";
 import {getClientBalance, getName} from "../../api/userAPI.js";
-import {addFunds} from "../../api/balanceOperationAPI.js";
+import {addFunds, getAllBalanceOperation} from "../../api/balanceOperationAPI.js";
 import {toast, ToastContainer} from "react-toastify";
 
 function UserPanel() {
@@ -19,7 +18,7 @@ function UserPanel() {
     const [addingBalance, setAddingBalance] = React.useState(false);
     const [addBalance, setAddBalance] = React.useState({
         email: user?.email || null,
-        amount: 100,
+        amount: 10,
     });
 
 
@@ -54,10 +53,24 @@ function UserPanel() {
             })
     }, [user?.email])
 
+    useEffect(() => {
+        if (!user?.email) return;
+
+       getAllBalanceOperation(user.email)
+            .then((response) => {
+                setBalanceOperations(response);
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+    }, [user?.email])
+
     const handleAddFunds = async (e) => {
         e.preventDefault();
         try {
             const response = await addFunds(addBalance);
+            setBalance(balance + addBalance.amount)
             setAddingBalance(false);
             toast.success("Doładowano konto!", {
                 className: 'min-w-[450px]',
@@ -134,6 +147,37 @@ function UserPanel() {
                                     <Ban className="w-44 h-44 mb-10"/>
                                     <h1 className="text-4xl font-semibold">Nie znaleziono operacji na saldzie konta!</h1>
                                 </div>
+                            )}
+                            {balanceOperations.length > 0 && (
+                               <table className="text-xl w-full mt-6 text-left">
+                                   <thead>
+                                        <tr className="text-center">
+                                            <th>Data</th>
+                                            <th>Typ</th>
+                                            <th className="text-right">Przed</th>
+                                            <th className="text-right">Zmiana</th>
+                                            <th className="text-right">Po</th>
+                                        </tr>
+                                   </thead>
+                                   <tbody>
+                                   {balanceOperations.map((operation) => (
+                                       <tr className="border-b-2 border-gray-400" key={operation.id}>
+                                           <td className="py-4">
+                                               {new Date(operation.operationDate).toLocaleString('pl-PL', {
+                                               day: '2-digit',
+                                               month: '2-digit',
+                                               year: 'numeric',
+                                               hour: '2-digit',
+                                               minute: '2-digit'
+                                           })}</td>
+                                           <td className="py-4">{operation.operationType === "ADD_FUNDS" ? "Doładowanie" : operation.operationType === "RESERVATION" ? "Rezerwacja" : "Anulowanie rezerwacji"}</td>
+                                           <td className="py-4 text-right">{Number(operation.balanceBefore).toFixed(2)} zł</td>
+                                           <td className="py-4 text-right">{Number(operation.amount).toFixed(2)} zł</td>
+                                           <td className="py-4 text-right">{Number(operation.balanceAfter).toFixed(2)} zł</td>
+                                       </tr>
+                                   ))}
+                                   </tbody>
+                               </table>
                             )}
                         </div>
                     </div>

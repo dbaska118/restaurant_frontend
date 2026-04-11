@@ -10,3 +10,13 @@ export const addFunds = async (addBalanceRequest) => {
         throw error;
     }
 }
+
+export const getAllBalanceOperation = async (email) => {
+    try {
+        const response = await api.get(`/balanceOperation/${email}`);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
