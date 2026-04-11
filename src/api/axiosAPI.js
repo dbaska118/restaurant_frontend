@@ -48,7 +48,6 @@ api.interceptors.response.use(
 
             try {
                 const res = await apiRefresh.post('api/auth/refresh');
-                console.log(res.data);
                 const token = res.data.token;
                 setAxiosAccessToken(token);
 

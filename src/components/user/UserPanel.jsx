@@ -6,6 +6,8 @@ import {useNavigate} from "react-router-dom";
 import {getAllDishes} from "../../api/dishAPI.js";
 import {useAuth} from "../../AuthContext.jsx";
 import {getClientBalance, getName} from "../../api/userAPI.js";
+import {addFunds} from "../../api/balanceOperationAPI.js";
+import {toast, ToastContainer} from "react-toastify";
 
 function UserPanel() {
     const [reservations, setReservations] = React.useState([]);
@@ -14,6 +16,11 @@ function UserPanel() {
     const navigate = useNavigate();
     const {user} = useAuth()
     const [name, setName] = React.useState({});
+    const [addingBalance, setAddingBalance] = React.useState(false);
+    const [addBalance, setAddBalance] = React.useState({
+        email: user?.email || null,
+        amount: 100,
+    });
 
 
     const navigateToPage = (source) => {
@@ -47,14 +54,56 @@ function UserPanel() {
             })
     }, [user?.email])
 
+    const handleAddFunds = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await addFunds(addBalance);
+            setAddingBalance(false);
+            toast.success("Doładowano konto!", {
+                className: 'min-w-[450px]',
+            });
+            setAddBalance({
+                email: user?.email || null,
+                amount: 10,
+            })
+        }
+        catch (error) {
+            console.log(error);
+            toast.error("Błąd doładowania konta!", {
+                className: 'min-w-[450px]',
+            });
+        }
+
+    }
+
     return (
         <div>
             <Menu/>
+            <ToastContainer position="top-center" className="text-xl" autoClose={3000} theme="light"/>
             <div className="mt-52 mx-10">
                 <div className="flex justify-between">
                     <h2 className="text-4xl font-semibold">{name === undefined ? 'Błąd pobrania imienia i nazwiska!' : `Witaj, ${name.firstName} ${name.lastName}!`}</h2>
                     <ProfileButtons />
                 </div>
+                {addingBalance && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                        <form onSubmit={handleAddFunds} className="w-full max-w-[750px] bg-white flex flex-col border-3  border-logotext rounded-xl pt-6 pb-12  px-12 text-2xl">
+                            <h3 className="text-4xl font-bold mb-6 text-center">Doładuj saldo</h3>
+                            <label className="mb-2">Kwota doładowania konta (min. 10 zł):</label>
+                            <input
+                                className="border-2 border-logotext rounded-xl p-4 text-xl mt-1 mb-10 outline-none focus:border-logotexthover"
+                                type="number"
+                                name="amount"
+                                min={10}
+                                step="0.01"
+                                value={addBalance.amount}
+                                onChange={(e) => setAddBalance({...addBalance, amount: Number(e.target.value)})}
+                            />
+                            <button type="submit"  className="w-full mb-6 border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Dodaj środki</button>
+                            <button type="button" onClick={() => setAddingBalance(false)} className="w-full border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Anuluj doładowanie</button>
+                        </form>
+                    </div>
+                )}
                 <div className="grid grid-cols-2 gap-24 justify-between mx-10 mt-10">
                     <div>
                         <div className="border-b w-full pb-4 pl-4">
@@ -73,7 +122,8 @@ function UserPanel() {
                     <div>
                         <div className="flex justify-between border-b w-full pb-4 pl-4">
                             <p className="text-3xl">Saldo <b>{balance === undefined ? "Błąd pobrania salda" : `${Number(balance).toFixed(2)} zł`}</b></p>
-                            <button className="flex text-3xl justify-center items-center gap-2 cursor-pointer hover:text-logotexthover">
+                            <button onClick={() => setAddingBalance(true)}
+                                className="flex text-3xl justify-center items-center gap-2 cursor-pointer hover:text-logotexthover">
                                 <CirclePlus className="w-7 h-7"/>
                                 <p>Dodaj środki</p>
                             </button>
