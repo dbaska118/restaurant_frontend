@@ -71,6 +71,7 @@ function UserPanel() {
         try {
             const response = await addFunds(addBalance);
             setBalance(balance + addBalance.amount)
+            setBalanceOperations((prevState => [...prevState, response]));
             setAddingBalance(false);
             toast.success("Doładowano konto!", {
                 className: 'min-w-[450px]',
@@ -149,9 +150,9 @@ function UserPanel() {
                                 </div>
                             )}
                             {balanceOperations.length > 0 && (
-                               <table className="text-xl w-full mt-6 text-left">
+                               <table className="text-2xl w-full mt-6 text-left">
                                    <thead>
-                                        <tr className="text-center">
+                                        <tr>
                                             <th>Data</th>
                                             <th>Typ</th>
                                             <th className="text-right">Przed</th>
@@ -160,7 +161,10 @@ function UserPanel() {
                                         </tr>
                                    </thead>
                                    <tbody>
-                                   {balanceOperations.map((operation) => (
+                                   {balanceOperations
+                                       .slice()
+                                       .sort((a,b) => new Date(b.operationDate) - new Date(a.operationDate))
+                                       .map((operation) => (
                                        <tr className="border-b-2 border-gray-400" key={operation.id}>
                                            <td className="py-4">
                                                {new Date(operation.operationDate).toLocaleString('pl-PL', {
@@ -172,7 +176,7 @@ function UserPanel() {
                                            })}</td>
                                            <td className="py-4">{operation.operationType === "ADD_FUNDS" ? "Doładowanie" : operation.operationType === "RESERVATION" ? "Rezerwacja" : "Anulowanie rezerwacji"}</td>
                                            <td className="py-4 text-right">{Number(operation.balanceBefore).toFixed(2)} zł</td>
-                                           <td className="py-4 text-right">{Number(operation.amount).toFixed(2)} zł</td>
+                                           <td className={`py-4 text-right font-bold ${operation.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>{Number(operation.amount).toFixed(2)} zł</td>
                                            <td className="py-4 text-right">{Number(operation.balanceAfter).toFixed(2)} zł</td>
                                        </tr>
                                    ))}
