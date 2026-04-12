@@ -80,7 +80,7 @@ function OpeningHours() {
             );
             setEditMode(false);
             setFormData(null);
-            toast.success("Edytowano godziny otwarcia godziny otwarcia!", {
+            toast.success("Edytowano godziny otwarcia!", {
                 className: 'min-w-[450px]',
             });
 
