@@ -9,3 +9,13 @@ export const createTablePrice = async (data) => {
         throw error;
     }
 };
+
+export const getAllTablePrice = async () => {
+    try {
+        const response = await api.get("/tablePrice");
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};

@@ -1,7 +1,8 @@
 import Menu from "../Menu.jsx";
 import {toast, ToastContainer} from "react-toastify";
-import {createTablePrice} from "../../api/tablePriceAPI.js";
-import React from "react";
+import {createTablePrice, getAllTablePrice} from "../../api/tablePriceAPI.js";
+import React, {useEffect} from "react";
+import {Ban, NotebookPen, Trash} from "lucide-react";
 
 function TablePriceEdit() {
     const [formData, setFormData] = React.useState({
@@ -9,6 +10,16 @@ function TablePriceEdit() {
         price: 10
     });
     const [tablePrice, setTablePrice] = React.useState([])
+
+    useEffect(() => {
+        getAllTablePrice()
+            .then((response) => {
+                setTablePrice(response);
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+    },[])
 
 
     const handleSubmit = async (e) => {
@@ -81,6 +92,30 @@ function TablePriceEdit() {
                     </div>
 
                     <div className="bg-white flex flex-col border-3  border-logotext rounded-xl py-6 px-12 text-2xl">
+                        {tablePrice.length === 0 && (
+                            <div className="flex flex-col items-center justify-center">
+                                <Ban className="w-44 h-44 mb-10"/>
+                                <h1 className="text-4xl font-semibold">Brak wpisów w cenniku!</h1>
+                            </div>
+                        )}
+                        {tablePrice.length > 0 && (
+                            <div>
+                                <h1 className="text-4xl font-semibold text-center mb-8">Ceny rezerwacji stolików</h1>
+                                {tablePrice
+                                    .sort((a, b) => a.numberOfChairs - b.numberOfChairs)
+                                    .map((table) => (
+                                    <div key={table.id} className="flex flex-col border-b-1 pt-2 pb-4 mb-8 border-gray-600">
+                                        <div className="flex justify-between ">
+                                            <h3 className="text-3xl font-semibold text-logotext">Stolik {table.numberOfChairs}-osobowy - {Number(table.price).toFixed(2)} zł</h3>
+                                            <div className="flex gap-4">
+                                                <button className="cursor-pointer flex items-center gap-1 text-green-500 hover:text-green-700"> <NotebookPen /> Edytuj</button>
+                                                <button className="cursor-pointer flex items-center gap-1 text-red-500 hover:text-red-700"> <Trash/> Usuń</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
