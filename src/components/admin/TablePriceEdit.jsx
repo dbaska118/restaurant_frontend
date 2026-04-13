@@ -1,6 +1,6 @@
 import Menu from "../Menu.jsx";
 import {toast, ToastContainer} from "react-toastify";
-import {createTablePrice, getAllTablePrice, updateTablePrice} from "../../api/tablePriceAPI.js";
+import {createTablePrice, deleteTablePrice, getAllTablePrice, updateTablePrice} from "../../api/tablePriceAPI.js";
 import React, {useEffect} from "react";
 import {Ban, NotebookPen, Trash} from "lucide-react";
 
@@ -38,6 +38,30 @@ function TablePriceEdit() {
             left: 0,
             behavior: 'smooth'
         })
+    }
+
+    const handleDelete = async (table) => {
+        try {
+            const response = await deleteTablePrice(table.numberOfChairs);
+            setTablePrice(prevState => prevState.filter(item => item.id !== response.id));
+            toast.success("Usunięto wpis w cenniku rezerwacji!", {
+                className: 'min-w-[450px]',
+            });
+
+        }
+        catch (error) {
+            console.log(error);
+            if(error.status === 409) {
+                toast.error("Istnieją stoliki przypisane do tego wpisu!", {
+                    className: 'min-w-[450px]',
+                });
+            }
+            else {
+                toast.error("Błąd usunięcia wpisu w cenniku rezerwacji!", {
+                    className: 'min-w-[450px]',
+                });
+            }
+        }
     }
 
 
@@ -170,7 +194,7 @@ function TablePriceEdit() {
                                             <h3 className="text-3xl font-semibold text-logotext">Stolik {table.numberOfChairs}-osobowy - {Number(table.price).toFixed(2)} zł</h3>
                                             <div className="flex gap-4">
                                                 <button onClick={() => handleEdit(table)} className="cursor-pointer flex items-center gap-1 text-green-500 hover:text-green-700"> <NotebookPen /> Edytuj</button>
-                                                <button className="cursor-pointer flex items-center gap-1 text-red-500 hover:text-red-700"> <Trash/> Usuń</button>
+                                                <button onClick={() => handleDelete(table)} className="cursor-pointer flex items-center gap-1 text-red-500 hover:text-red-700"> <Trash/> Usuń</button>
                                             </div>
                                         </div>
                                     </div>

@@ -29,3 +29,14 @@ export const updateTablePrice = async (numberOfChairs, data) => {
         throw error;
     }
 };
+
+export const deleteTablePrice = async (numberOfChairs) => {
+    try {
+        const response = await api.delete(`/tablePrice/${numberOfChairs}`);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
