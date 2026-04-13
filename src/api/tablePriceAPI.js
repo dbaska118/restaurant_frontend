@@ -19,3 +19,13 @@ export const getAllTablePrice = async () => {
         throw error;
     }
 };
+
+export const updateTablePrice = async (numberOfChairs, data) => {
+    try {
+        const response = await api.put(`/tablePrice/${numberOfChairs}`, data);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};

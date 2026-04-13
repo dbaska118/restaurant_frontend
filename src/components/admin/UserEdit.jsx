@@ -295,7 +295,7 @@ function UserEdit() {
                                     <label>Adres e-mail:</label>
                                     {editMode && (
                                         <input
-                                            className="border-2 border-logotext rounded-xl p-3 text-xl text-gray-600 mt-1 mb-2 outline-none focus:border-logotexthover"
+                                            className="border-2 border-gray-600 rounded-xl p-3 text-xl text-gray-600 mt-1 mb-2 outline-none "
                                             type="text"
                                             name="email"
                                             placeholder="Adres e-mail"
@@ -353,7 +353,7 @@ function UserEdit() {
                                     <label>Rola:</label>
                                     {editMode && (
                                         <input
-                                            className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-2 outline-none focus:border-logotexthover"
+                                            className="border-2 border-gray-600 rounded-xl p-3 text-xl mt-1 mb-2 outline-none text-gray-600"
                                             type="text"
                                             name="type"
                                             value={formData.type === "client" ? "Klient" : formData.type === "employee" ? "Pracownik" : "Administrator"}

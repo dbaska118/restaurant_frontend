@@ -1,6 +1,6 @@
 import Menu from "../Menu.jsx";
 import {toast, ToastContainer} from "react-toastify";
-import {createTablePrice, getAllTablePrice} from "../../api/tablePriceAPI.js";
+import {createTablePrice, getAllTablePrice, updateTablePrice} from "../../api/tablePriceAPI.js";
 import React, {useEffect} from "react";
 import {Ban, NotebookPen, Trash} from "lucide-react";
 
@@ -10,6 +10,7 @@ function TablePriceEdit() {
         price: 10
     });
     const [tablePrice, setTablePrice] = React.useState([])
+    const [editMode, setEditMode] = React.useState(false);
 
     useEffect(() => {
         getAllTablePrice()
@@ -21,31 +22,71 @@ function TablePriceEdit() {
             })
     },[])
 
+    const cancelEdit = () => {
+        setEditMode(false);
+        setFormData({
+            numberOfChairs: 1,
+            price: 10
+        })
+    }
+
+    const handleEdit = (table) => {
+        setEditMode(true);
+        setFormData(table)
+        window.scroll({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+        })
+    }
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            const response = await createTablePrice(formData);
-            setTablePrice((prevState => [...prevState, response]));
-            toast.success("Dodano wpis w cenniku rezerwacji!", {
-                className: 'min-w-[450px]',
-            });
-            setFormData({
-                numberOfChairs: 1,
-                price: 10
-            })
-        }
-        catch (error) {
-            console.log(error);
-            if(error.status === 409) {
-                toast.error("Istnieje wpis dotyczący wprowadzonej liczby miejsc!", {
+        if(editMode){
+            try {
+                const response = await updateTablePrice(formData.numberOfChairs, formData);
+                setTablePrice(prevState => prevState.map(item => item.id === response.id ? response : item));
+                toast.success("Edytowano wpis w cenniku rezerwacji!", {
+                    className: 'min-w-[450px]',
+                });
+                setEditMode(false);
+                setFormData({
+                    numberOfChairs: 1,
+                    price: 10
+                })
+            }
+            catch (error) {
+                console.log(error);
+                toast.error("Błąd edycji wpisu w cenniku rezerwacji!", {
                     className: 'min-w-[450px]',
                 });
             }
-            else {
-                toast.error("Błąd dodania wpisu w cenniku rezerwacji!", {
+        }
+        else {
+            try {
+                const response = await createTablePrice(formData);
+                setTablePrice((prevState => [...prevState, response]));
+                toast.success("Dodano wpis w cenniku rezerwacji!", {
                     className: 'min-w-[450px]',
                 });
+                setFormData({
+                    numberOfChairs: 1,
+                    price: 10
+                })
+            }
+            catch (error) {
+                console.log(error);
+                if(error.status === 409) {
+                    toast.error("Istnieje wpis dotyczący wprowadzonej liczby miejsc!", {
+                        className: 'min-w-[450px]',
+                    });
+                }
+                else {
+                    toast.error("Błąd dodania wpisu w cenniku rezerwacji!", {
+                        className: 'min-w-[450px]',
+                    });
+                }
             }
         }
     }
@@ -63,14 +104,26 @@ function TablePriceEdit() {
                             <div className="grid grid-cols-2 gap-10">
                                 <div className="flex flex-col">
                                     <label>Ilość miejsc:</label>
-                                    <input
-                                        className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-2 outline-none focus:border-logotexthover"
-                                        type="number"
-                                        name="numberOfChairs"
-                                        min="1"
-                                        value={formData.numberOfChairs}
-                                        onChange={(e) => setFormData({...formData, numberOfChairs: Number(e.target.value)})}
-                                    />
+                                    {editMode && (
+                                        <input
+                                            className="border-2 border-gray-600 rounded-xl p-3 text-xl mt-1 mb-2 outline-none text-gray-600"
+                                            type="number"
+                                            name="numberOfChairs"
+                                            min="1"
+                                            value={formData.numberOfChairs}
+                                            readOnly={true}
+                                        />
+                                    )}
+                                    {!editMode && (
+                                        <input
+                                            className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-2 outline-none focus:border-logotexthover"
+                                            type="number"
+                                            name="numberOfChairs"
+                                            min="1"
+                                            value={formData.numberOfChairs}
+                                            onChange={(e) => setFormData({...formData, numberOfChairs: Number(e.target.value)})}
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex flex-col">
                                     <label>Cena:</label>
@@ -85,7 +138,15 @@ function TablePriceEdit() {
                                     />
                                 </div>
                                 <div className="col-span-2 flex items-center justify-center">
+                                    {editMode && (
+                                        <div className="flex gap-10 w-full">
+                                            <button type="submit"  className="w-1/2 border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Edytuj wpis</button>
+                                            <button onClick={() => cancelEdit()}  className="w-1/2 border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Anuluj</button>
+                                        </div>
+                                    )}
+                                    {!editMode && (
                                         <button type="submit"  className="w-1/2 border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Dodaj wpis w cenniku</button>
+                                    )}
                                 </div>
                             </div>
                         </form>
@@ -108,7 +169,7 @@ function TablePriceEdit() {
                                         <div className="flex justify-between ">
                                             <h3 className="text-3xl font-semibold text-logotext">Stolik {table.numberOfChairs}-osobowy - {Number(table.price).toFixed(2)} zł</h3>
                                             <div className="flex gap-4">
-                                                <button className="cursor-pointer flex items-center gap-1 text-green-500 hover:text-green-700"> <NotebookPen /> Edytuj</button>
+                                                <button onClick={() => handleEdit(table)} className="cursor-pointer flex items-center gap-1 text-green-500 hover:text-green-700"> <NotebookPen /> Edytuj</button>
                                                 <button className="cursor-pointer flex items-center gap-1 text-red-500 hover:text-red-700"> <Trash/> Usuń</button>
                                             </div>
                                         </div>
