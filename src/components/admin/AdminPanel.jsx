@@ -47,7 +47,7 @@ function AdminPanel() {
                         <p className="text-3xl">Cennik rezerwacji</p>
                     </button>
                     <button className="flex justify-center items-center gap-2 w-full border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover"
-                            onClick={() => navigateToPage("/admin/openingHours")}>
+                            onClick={() => navigateToPage("/admin/restaurantTable")}>
                         <Icon iconNode={chairsTablePlatter} className="w-9 h-9" />
                         <p className="text-3xl">Stoliki</p>
                     </button>

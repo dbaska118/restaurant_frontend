@@ -1,0 +1,116 @@
+import Menu from "../Menu.jsx";
+import {toast, ToastContainer} from "react-toastify";
+import {Ban, NotebookPen, Trash} from "lucide-react";
+import React, {useEffect} from "react";
+import {getPossibleNumberOfChairs} from "../../api/tablePriceAPI.js";
+import {createRestaurantTable} from "../../api/restaurantTableAPI.js";
+
+function RestaurantTableEdit() {
+    const [possibleNumberOfChairs, setPossibleNumberOfChairs] = React.useState([])
+    const [formData, setFormData] = React.useState({
+        name: "",
+        numberOfChairs: undefined,
+    });
+
+    useEffect(() => {
+        getPossibleNumberOfChairs()
+            .then((response) => {
+                console.log(response);
+                setPossibleNumberOfChairs(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+    }, []);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if(formData.numberOfChairs === undefined) {
+            toast.error('Przed dodaniem stolików wymagane jest stworzenie wpisu w cenniku rezerwacji!', {
+                className: 'min-w-[450px]',
+            });
+            return;
+        }
+        try {
+            const response = await createRestaurantTable(formData);
+            toast.success('Dodano nowy stolik!', {
+                className: 'min-w-[450px]',
+            });
+            setFormData({
+                name: "",
+                numberOfChairs: undefined,
+            })
+        }
+        catch (error) {
+            console.log(error);
+            if(error.status === 400) {
+                toast.error('Wpis w cenniku rezerwacji dla podanej liczby miejsc nie istnieje!', {
+                    className: 'min-w-[450px]',
+                });
+            }
+            else {
+                toast.error('Błąd dodania nowego stolika!', {
+                    className: 'min-w-[450px]',
+                });
+            }
+        }
+    }
+
+    return (
+        <div className="min-h-screen flex flex-col">
+            <Menu/>
+            <ToastContainer position="top-center" className="text-xl" autoClose={3000} theme="light"/>
+            <div className="relative w-full min-h-screen flex justify-center pt-52 pb-20">
+                <div className="absolute inset-0 bg-repeat bg-[url('/utensils-crossed.svg')] z-0"></div>
+                <div className="relative w-3/4 z-10">
+                    <div className="bg-white flex flex-col border-3  border-logotext rounded-xl py-6 px-12 text-2xl mb-20">
+                        <h1 className="text-4xl font-semibold text-center mb-5">Cennik rezerwacji</h1>
+                        <form onSubmit={(e) => handleSubmit(e)}>
+                            <div className="grid grid-cols-2 gap-10">
+                                <div className="flex flex-col">
+                                    <label>Nazwa:</label>
+                                        <input
+                                            className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-2 outline-none focus:border-logotexthover"
+                                            type="text"
+                                            name="name"
+                                            placeholder="Nazwa stolika"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                        />
+                                </div>
+                                <div className="flex flex-col">
+                                    <label>Ilość miejsc:</label>
+                                    <select value={formData.numberOfChairs}
+                                            onChange={(e) => setFormData({...formData, numberOfChairs: Number(e.target.value)})}
+                                            className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-2 outline-none focus:border-logotexthover"
+                                    >
+                                        {possibleNumberOfChairs.length === 0 && (
+                                            <option value={undefined}>Brak wpisów w cenniku</option>
+                                        )}
+                                        {possibleNumberOfChairs.map(number => (
+                                            <option key={number} value={number}>{number}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="col-span-2 flex items-center justify-center">
+                                    <button type="submit"  className="w-1/2 border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Dodaj stolik</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div className="bg-white flex flex-col border-3  border-logotext rounded-xl py-6 px-12 text-2xl">
+                        {0 === 0 && (
+                            <div className="flex flex-col items-center justify-center">
+                                <Ban className="w-44 h-44 mb-10"/>
+                                <h1 className="text-4xl font-semibold">Nie dodano jeszcze żadnych stolików!</h1>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default RestaurantTableEdit;

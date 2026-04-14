@@ -40,3 +40,13 @@ export const deleteTablePrice = async (numberOfChairs) => {
     }
 };
 
+export const getPossibleNumberOfChairs = async () => {
+    try {
+        const response = await api.get("/tablePrice/possibleNumberOfChairs");
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+

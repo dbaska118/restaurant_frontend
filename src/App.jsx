@@ -14,6 +14,7 @@ import {AuthProvider} from "./AuthContext.jsx";
 import UserEdit from "./components/admin/UserEdit.jsx";
 import OpeningHours from "./components/admin/OpeningHours.jsx";
 import TablePriceEdit from "./components/admin/TablePriceEdit.jsx";
+import RestaurantTableEdit from "./components/admin/RestaurantTableEdit.jsx";
 
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
                     <Route path="/admin/users" element={<UserEdit/>} />
                     <Route path="/admin/openingHours" element={<OpeningHours/>} />
                     <Route path="/admin/tablePrice" element={<TablePriceEdit/>} />
+                    <Route path="/admin/restaurantTable" element={<RestaurantTableEdit />} />
                 </Routes>
             </Router>
         </AuthProvider>
