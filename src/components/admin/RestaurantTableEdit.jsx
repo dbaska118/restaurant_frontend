@@ -3,7 +3,7 @@ import {toast, ToastContainer} from "react-toastify";
 import {Ban, NotebookPen, Trash} from "lucide-react";
 import React, {useEffect} from "react";
 import {getPossibleNumberOfChairs} from "../../api/tablePriceAPI.js";
-import {createRestaurantTable} from "../../api/restaurantTableAPI.js";
+import {createRestaurantTable, getAllRestaurantTable} from "../../api/restaurantTableAPI.js";
 
 function RestaurantTableEdit() {
     const [possibleNumberOfChairs, setPossibleNumberOfChairs] = React.useState([])
@@ -11,17 +11,27 @@ function RestaurantTableEdit() {
         name: "",
         numberOfChairs: undefined,
     });
+    const [restaurantTable, setRestaurantTable] = React.useState([])
 
     useEffect(() => {
         getPossibleNumberOfChairs()
             .then((response) => {
-                console.log(response);
                 setPossibleNumberOfChairs(response);
             })
             .catch((error) => {
                 console.log(error);
             })
     }, []);
+
+    useEffect(() => {
+        getAllRestaurantTable()
+            .then((response) => {
+                setRestaurantTable(response);
+            })
+        .catch((error) => {
+            console.log(error);
+        })
+    },[])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -33,12 +43,13 @@ function RestaurantTableEdit() {
         }
         try {
             const response = await createRestaurantTable(formData);
+            setRestaurantTable((prevState => [...prevState, response]));
             toast.success('Dodano nowy stolik!', {
                 className: 'min-w-[450px]',
             });
             setFormData({
                 name: "",
-                numberOfChairs: undefined,
+                numberOfChairs: possibleNumberOfChairs[0],
             })
         }
         catch (error) {
@@ -100,10 +111,28 @@ function RestaurantTableEdit() {
                     </div>
 
                     <div className="bg-white flex flex-col border-3  border-logotext rounded-xl py-6 px-12 text-2xl">
-                        {0 === 0 && (
+                        {restaurantTable.length === 0 && (
                             <div className="flex flex-col items-center justify-center">
                                 <Ban className="w-44 h-44 mb-10"/>
                                 <h1 className="text-4xl font-semibold">Nie dodano jeszcze żadnych stolików!</h1>
+                            </div>
+                        )}
+                        {restaurantTable.length > 0 && (
+                            <div>
+                                <h1 className="text-4xl font-semibold text-center">Stoliki</h1>
+                                {restaurantTable
+                                    .sort((a,b) => a.numberOfChairs - b.numberOfChairs)
+                                    .map(table => (
+                                    <div key={table.id} className="flex flex-col border-b-1 pt-2 pb-4 mb-8 border-gray-600">
+                                        <div className="flex justify-between ">
+                                            <h3 className="text-3xl font-semibold text-logotext">{table.name} - miejsca: {table.numberOfChairs}</h3>
+                                            <div className="flex gap-4">
+                                                <button className="cursor-pointer flex items-center gap-1 text-green-500 hover:text-green-700"> <NotebookPen /> Edytuj</button>
+                                                <button className="cursor-pointer flex items-center gap-1 text-red-500 hover:text-red-700"> <Trash/> Usuń</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>

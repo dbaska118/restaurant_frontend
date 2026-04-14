@@ -10,3 +10,14 @@ export const createRestaurantTable = async (data) => {
         throw error;
     }
 }
+
+export const getAllRestaurantTable = async () => {
+    try {
+        const response = await api.get("/restaurantTable");
+        return response.data;
+    }
+    catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
