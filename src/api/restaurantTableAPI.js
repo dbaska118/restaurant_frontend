@@ -21,3 +21,25 @@ export const getAllRestaurantTable = async () => {
         throw error;
     }
 }
+
+export const deleteRestaurantTable = async (id) => {
+    try {
+        const response = await api.delete(`/restaurantTable/${id}`);
+        return response.data;
+    }
+    catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
+export const updateRestaurantTable = async (id, data) => {
+    try {
+        const response = await api.put(`/restaurantTable/${id}`, data);
+        return response.data;
+    }
+    catch (error) {
+        console.error(error);
+        throw error;
+    }
+}

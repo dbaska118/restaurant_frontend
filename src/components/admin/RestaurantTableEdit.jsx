@@ -3,7 +3,7 @@ import {toast, ToastContainer} from "react-toastify";
 import {Ban, NotebookPen, Trash} from "lucide-react";
 import React, {useEffect} from "react";
 import {getPossibleNumberOfChairs} from "../../api/tablePriceAPI.js";
-import {createRestaurantTable, getAllRestaurantTable} from "../../api/restaurantTableAPI.js";
+import {createRestaurantTable, getAllRestaurantTable, deleteRestaurantTable, updateRestaurantTable} from "../../api/restaurantTableAPI.js";
 
 function RestaurantTableEdit() {
     const [possibleNumberOfChairs, setPossibleNumberOfChairs] = React.useState([])
@@ -12,6 +12,7 @@ function RestaurantTableEdit() {
         numberOfChairs: undefined,
     });
     const [restaurantTable, setRestaurantTable] = React.useState([])
+    const [editMode, setEditMode] = React.useState(false);
 
     useEffect(() => {
         getPossibleNumberOfChairs()
@@ -41,29 +42,87 @@ function RestaurantTableEdit() {
             });
             return;
         }
+        if(editMode) {
+            try {
+                const response = await updateRestaurantTable(formData.id, formData);
+                toast.success('Edytowano stolik!', {
+                    className: 'min-w-[450px]',
+                });
+                setRestaurantTable((prevState => prevState.map(item => item.id === response.id ? response : item)))
+                setEditMode(false);
+                setFormData({
+                    name: "",
+                    numberOfChairs: possibleNumberOfChairs[0],
+                })
+            }
+            catch (error) {
+                console.error(error);
+                if(error.status === 400) {
+                    toast.error('Wpis w cenniku rezerwacji dla podanej liczby miejsc nie istnieje!', {
+                        className: 'min-w-[450px]',
+                    });
+                }
+                else {
+                    toast.error('Błąd edycji stolika!', {
+                        className: 'min-w-[450px]',
+                    });
+                }
+            }
+        }
+        else {
+            try {
+                const response = await createRestaurantTable(formData);
+                setRestaurantTable((prevState => [...prevState, response]));
+                toast.success('Dodano nowy stolik!', {
+                    className: 'min-w-[450px]',
+                });
+                setFormData({
+                    name: "",
+                    numberOfChairs: possibleNumberOfChairs[0],
+                })
+            }
+            catch (error) {
+                console.log(error);
+                if(error.status === 400) {
+                    toast.error('Wpis w cenniku rezerwacji dla podanej liczby miejsc nie istnieje!', {
+                        className: 'min-w-[450px]',
+                    });
+                }
+                else {
+                    toast.error('Błąd dodania nowego stolika!', {
+                        className: 'min-w-[450px]',
+                    });
+                }
+            }
+        }
+    }
+
+    const cancelEdit = () => {
+        setEditMode(false);
+        setFormData({
+            name: "",
+            numberOfChairs: possibleNumberOfChairs[0],
+        })
+    }
+
+    const handleEdit = (table) => {
+        setEditMode(true);
+        setFormData(table);
+    }
+
+    const handleDelete = async (table) => {
         try {
-            const response = await createRestaurantTable(formData);
-            setRestaurantTable((prevState => [...prevState, response]));
-            toast.success('Dodano nowy stolik!', {
+            const response = await deleteRestaurantTable(table.id);
+            setRestaurantTable(prevState => prevState.filter(restaurant => restaurant.id !== response.id));
+            toast.success('Usunięto stolik!', {
                 className: 'min-w-[450px]',
             });
-            setFormData({
-                name: "",
-                numberOfChairs: possibleNumberOfChairs[0],
-            })
         }
         catch (error) {
             console.log(error);
-            if(error.status === 400) {
-                toast.error('Wpis w cenniku rezerwacji dla podanej liczby miejsc nie istnieje!', {
-                    className: 'min-w-[450px]',
-                });
-            }
-            else {
-                toast.error('Błąd dodania nowego stolika!', {
-                    className: 'min-w-[450px]',
-                });
-            }
+            toast.error('Błąd usunięcia stolika!', {
+                className: 'min-w-[450px]',
+            });
         }
     }
 
@@ -104,7 +163,15 @@ function RestaurantTableEdit() {
                                     </select>
                                 </div>
                                 <div className="col-span-2 flex items-center justify-center">
-                                    <button type="submit"  className="w-1/2 border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Dodaj stolik</button>
+                                    {editMode && (
+                                        <div className="flex gap-10 w-full">
+                                            <button type="submit"  className="w-1/2 border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Edytuj stolik</button>
+                                            <button onClick={() => cancelEdit()}  className="w-1/2 border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Anuluj</button>
+                                        </div>
+                                    )}
+                                    {!editMode && (
+                                        <button type="submit"  className="w-1/2 border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Dodaj stolik</button>
+                                    )}
                                 </div>
                             </div>
                         </form>
@@ -121,14 +188,19 @@ function RestaurantTableEdit() {
                             <div>
                                 <h1 className="text-4xl font-semibold text-center">Stoliki</h1>
                                 {restaurantTable
-                                    .sort((a,b) => a.numberOfChairs - b.numberOfChairs)
+                                    .sort((a, b) => {
+                                        if (a.numberOfChairs !== b.numberOfChairs) {
+                                            return a.numberOfChairs - b.numberOfChairs;
+                                        }
+                                        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+                                    })
                                     .map(table => (
                                     <div key={table.id} className="flex flex-col border-b-1 pt-2 pb-4 mb-8 border-gray-600">
                                         <div className="flex justify-between ">
                                             <h3 className="text-3xl font-semibold text-logotext">{table.name} - miejsca: {table.numberOfChairs}</h3>
                                             <div className="flex gap-4">
-                                                <button className="cursor-pointer flex items-center gap-1 text-green-500 hover:text-green-700"> <NotebookPen /> Edytuj</button>
-                                                <button className="cursor-pointer flex items-center gap-1 text-red-500 hover:text-red-700"> <Trash/> Usuń</button>
+                                                <button onClick={() => handleEdit(table)} className="cursor-pointer flex items-center gap-1 text-green-500 hover:text-green-700"> <NotebookPen /> Edytuj</button>
+                                                <button onClick={() => handleDelete(table)} className="cursor-pointer flex items-center gap-1 text-red-500 hover:text-red-700"> <Trash/> Usuń</button>
                                             </div>
                                         </div>
                                     </div>
