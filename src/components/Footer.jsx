@@ -4,11 +4,14 @@ import {FaInstagram, FaFacebook, FaTiktok} from "react-icons/fa";
 
 function Footer() {
     const [groupedOpeningHours, setGroupedOpeningHours] = useState([]);
+    const [isOpen, setIsOpen] = useState(false);
+    const [weekDayNumber, setWeekDayNumber] = useState(0);
 
     useEffect(() => {
         getAllOpeningHours()
             .then(result => {
                 groupOpeningHours(result)
+                isRestaurantOpen(result)
             })
         .catch(error => {
             console.log(error);
@@ -25,6 +28,16 @@ function Footer() {
         "SUNDAY": "niedz."
     };
 
+    const dayNumber = {
+        "MONDAY": 1,
+        "TUESDAY": 2,
+        "WEDNESDAY": 3,
+        "THURSDAY": 4,
+        "FRIDAY": 5,
+        "SATURDAY": 6,
+        "SUNDAY": 7
+    }
+
     const groupOpeningHours = (openingHours) => {
         if( openingHours.length > 0 ) {
             let start = openingHours[0]
@@ -34,7 +47,9 @@ function Footer() {
                 if(!current || start.openTime !== current.openTime || start.closeTime !== current.closeTime) {
                    grouppedHours.push({
                        startDay: start.dayOfWeek,
+                       startDayNumber: dayNumber[start.dayOfWeek],
                        endDay: openingHours[i-1].dayOfWeek,
+                       endDayNumber: dayNumber[openingHours[i-1].dayOfWeek],
                        openTime: start.openTime,
                        closeTime: start.closeTime
                    })
@@ -45,6 +60,23 @@ function Footer() {
             }
             console.log(grouppedHours)
             setGroupedOpeningHours(grouppedHours)
+        }
+    }
+
+    const isRestaurantOpen = (openingHours) => {
+        if( openingHours.length > 0 ) {
+            const now = new Date()
+            const weekDays = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+
+            const today = weekDays[now.getDay()]
+            const dataToCheck = openingHours.find((openingHours) => openingHours.dayOfWeek === today);
+
+            const nowMinutes = now.getHours() * 60 + now.getMinutes();
+            const openTimeMinutes = Number(dataToCheck.openTime.slice(0,2)) * 60 + Number(dataToCheck.openTime.slice(3,5));
+            const closeTimeMinutes = Number(dataToCheck.closeTime.slice(0,2)) * 60 + Number(dataToCheck.closeTime.slice(3,5));
+
+            setIsOpen((nowMinutes >= openTimeMinutes && nowMinutes < closeTimeMinutes))
+            setWeekDayNumber(dayNumber[dataToCheck.dayOfWeek])
         }
     }
 
@@ -101,14 +133,20 @@ function Footer() {
                         <p>Brak informacji o godzinach otwarcia</p>
                     )}
                     {groupedOpeningHours.map((openingHour) => (
-                        <div key={openingHour.startDay} className="flex justify-between">
-                            <p>
-                                {openingHour.startDay === openingHour.endDay ?
-                                    `${dayTranslations[openingHour.startDay]}` :
-                                    `${dayTranslations[openingHour.startDay]} - ${dayTranslations[openingHour.endDay]}`
-                                }
+                        <div key={openingHour.startDay} className="flex w-full">
+                            <p className="w-1/3 text-left">
+                                    {openingHour.startDay === openingHour.endDay ?
+                                        `${dayTranslations[openingHour.startDay]}` :
+                                        `${dayTranslations[openingHour.startDay]} - ${dayTranslations[openingHour.endDay]}`
+                                    }
                             </p>
-                            <p> {`${openingHour.openTime.slice(0,5)} - ${openingHour.closeTime.slice(0,5)}`}</p>
+                            <p className="w-1/3 text-center"> {`${openingHour.openTime.slice(0,5)} - ${openingHour.closeTime.slice(0,5)}`}</p>
+                            {(weekDayNumber >= openingHour.startDayNumber && weekDayNumber <= openingHour.endDayNumber) && (
+                                <div className="w-1/3 flex justify-end items-center gap-1">
+                                    <div className={`w-4 h-4 rounded-full  animate-pulse ${isOpen ? `bg-green-600` : `bg-red-600`} `}></div>
+                                    <p>{isOpen ? "Otwarte" : "Zamknięte"}</p>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
