@@ -2,6 +2,7 @@ import Menu from "./Menu.jsx";
 import MainPage from "./MainPage.jsx";
 import React, {useEffect} from "react";
 import {getAllDishes} from "../api/dishAPI.js";
+import Footer from "./Footer.jsx";
 
 
 function DishMenu() {
@@ -115,6 +116,7 @@ function DishMenu() {
                     ))}
                 </div>
             </div>
+            <Footer/>
         </div>
     )
 }

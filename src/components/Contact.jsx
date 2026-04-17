@@ -34,6 +34,7 @@ function Contact() {
                 <div className="grid grid-cols-2 mt-10 mb-10">
                     <div className="text-2xl text-center">
                         <p className="text-3xl font-semibold mb-6">Pałac smaku</p>
+                        <p>NIP: 1234567899</p>
                         <p>Ignacego Paderewskiego 6</p>
                         <p>93-509 Łódź</p>
                         <p className="mt-10 font-semibold">Kontakt telefoniczny:</p>

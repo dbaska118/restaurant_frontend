@@ -1,5 +1,6 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {getAllOpeningHours} from "../api/openingHoursAPI.js";
+import {FaInstagram, FaFacebook, FaTiktok} from "react-icons/fa";
 
 function Footer() {
     const [groupedOpeningHours, setGroupedOpeningHours] = useState([]);
@@ -53,29 +54,77 @@ function Footer() {
 
 
     return (
-        <div className="bg-amber-50">
-            <div className="grid grid-cols-2">
+        <div className="bg-amber-50 ">
+            <div className="grid grid-cols-5 mx-auto">
+                <div className="flex flex-col text-center items-center">
+                    <p>Pałac smaku</p>
+                    <p>NIP: 1234567899</p>
+                    <p>Ignacego Paderewskiego 6</p>
+                    <p>93-509 Łódź</p>
+                </div>
                 <div className="flex flex-col">
-                    <h1>GODZINY OTWARCIA:</h1>
+                    <h1 className="text-center">NAWIGACJA</h1>
+                    <button>
+                        <p>Strona główna</p>
+                    </button>
+                    <button>
+                        <p>Karta dań</p>
+                    </button>
+                    <button>
+                        <p>Rezerwacje</p>
+                    </button>
+                    <button>
+                        <p>Kontakt</p>
+                    </button>
+                    <button>
+                        <p>Logowanie</p>
+                    </button>
+                </div>
+                <div className="flex flex-col">
+                    <h1 className="text-center">POMOC</h1>
+                    <button>
+                        <p>Polityka prywatności</p>
+                    </button>
+                    <button>
+                        <p>Regulamin rezerwacji</p>
+                    </button>
+                    <button>
+                        <p>Alergeny</p>
+                    </button>
+                    <button>
+                        <p>Często zadawane pytania (FAQ)</p>
+                    </button>
+                </div>
+                <div className="flex flex-col">
+                    <h1 className="text-center">GODZINY OTWARCIA</h1>
                     {groupedOpeningHours.length === 0 && (
                         <p>Brak informacji o godzinach otwarcia</p>
                     )}
                     {groupedOpeningHours.map((openingHour) => (
-                        <div key={openingHour.startDay}>
+                        <div key={openingHour.startDay} className="flex justify-between">
                             <p>
-                                <span>
-                                    {openingHour.startDay === openingHour.endDay ?
-                                        `${dayTranslations[openingHour.startDay]}` :
-                                        `${dayTranslations[openingHour.startDay]} - ${dayTranslations[openingHour.endDay]}`
-                                    }
-                                </span>
-                                {`${openingHour.openTime.slice(0,5)} - ${openingHour.closeTime.slice(0,5)}`}
+                                {openingHour.startDay === openingHour.endDay ?
+                                    `${dayTranslations[openingHour.startDay]}` :
+                                    `${dayTranslations[openingHour.startDay]} - ${dayTranslations[openingHour.endDay]}`
+                                }
                             </p>
+                            <p> {`${openingHour.openTime.slice(0,5)} - ${openingHour.closeTime.slice(0,5)}`}</p>
                         </div>
                     ))}
                 </div>
+                <div className="flex flex-col">
+                    <h1 className="text-center">OBSERWUJ NAS</h1>
+                    <div className="flex justify-center gap-3">
+                        <FaFacebook/>
+                        <FaInstagram/>
+                        <FaTiktok/>
+                    </div>
+                </div>
             </div>
-            <p>@Pałac smaku</p>
+            <div className="border-t flex justify-between px-10">
+                <p>© 2024 Pałac smaku. Wszelkie prawa zastrzeżone.</p>
+                <p>Realizacja: Dawid Baska</p>
+            </div>
         </div>
     )
 }
