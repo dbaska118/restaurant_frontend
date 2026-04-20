@@ -87,15 +87,15 @@ function Footer() {
 
     return (
         <div className="bg-amber-50 ">
-            <div className="grid grid-cols-5 mx-auto">
+            <div className="grid grid-cols-5 mx-auto py-3 text-footertext text-lg">
                 <div className="flex flex-col text-center items-center">
-                    <p>Pałac smaku</p>
+                    <p className="font-serif text-logotext text-2xl mt-6">Pałac smaku</p>
                     <p>NIP: 1234567899</p>
                     <p>Ignacego Paderewskiego 6</p>
                     <p>93-509 Łódź</p>
                 </div>
                 <div className="flex flex-col">
-                    <h1 className="text-center">NAWIGACJA</h1>
+                    <h1 className="text-center font-serif text-logotext text-xl mb-1">NAWIGACJA</h1>
                     <button>
                         <p>Strona główna</p>
                     </button>
@@ -113,7 +113,7 @@ function Footer() {
                     </button>
                 </div>
                 <div className="flex flex-col">
-                    <h1 className="text-center">POMOC</h1>
+                    <h1 className="text-center font-serif text-logotext text-xl mb-1">POMOC</h1>
                     <button>
                         <p>Polityka prywatności</p>
                     </button>
@@ -121,14 +121,17 @@ function Footer() {
                         <p>Regulamin rezerwacji</p>
                     </button>
                     <button>
-                        <p>Alergeny</p>
+                        <p>Alergeny w posiłkach</p>
                     </button>
                     <button>
                         <p>Często zadawane pytania (FAQ)</p>
                     </button>
+                    <button>
+                        <p>Mapa strony</p>
+                    </button>
                 </div>
                 <div className="flex flex-col">
-                    <h1 className="text-center">GODZINY OTWARCIA</h1>
+                    <h1 className="text-center font-serif text-logotext text-xl mb-1">GODZINY OTWARCIA</h1>
                     {groupedOpeningHours.length === 0 && (
                         <p>Brak informacji o godzinach otwarcia</p>
                     )}
@@ -151,15 +154,21 @@ function Footer() {
                     ))}
                 </div>
                 <div className="flex flex-col">
-                    <h1 className="text-center">OBSERWUJ NAS</h1>
-                    <div className="flex justify-center gap-3">
-                        <FaFacebook/>
-                        <FaInstagram/>
-                        <FaTiktok/>
+                    <h1 className="text-center font-serif text-logotext text-xl mb-6">OBSERWUJ NAS</h1>
+                    <div className="flex justify-center  gap-5">
+                        <button className="border-2 rounded-full border-footertext p-2 hover:bg-footertext hover:text-amber-50">
+                            <FaFacebook className="w-8 h-auto"/>
+                        </button>
+                        <button className="border-2 rounded-full border-footertext p-2 hover:bg-footertext hover:text-amber-50">
+                            <FaInstagram className="w-8 h-auto"/>
+                        </button>
+                        <button className="border-2 rounded-full border-footertext p-2 hover:bg-footertext hover:text-amber-50">
+                            <FaTiktok className="w-8 h-auto"/>
+                        </button>
                     </div>
                 </div>
             </div>
-            <div className="border-t flex justify-between px-10">
+            <div className="border-t flex justify-between px-10 py-2 text-footertext">
                 <p>© 2024 Pałac smaku. Wszelkie prawa zastrzeżone.</p>
                 <p>Realizacja: Dawid Baska</p>
             </div>
