@@ -1,11 +1,16 @@
 import React, {useEffect, useState} from "react";
 import {getAllOpeningHours} from "../api/openingHoursAPI.js";
 import {FaInstagram, FaFacebook, FaTiktok} from "react-icons/fa";
+import {ArrowRight } from 'lucide-react';
+import {useAuth} from "../AuthContext.jsx";
+import {toast} from "react-toastify";
 
 function Footer() {
     const [groupedOpeningHours, setGroupedOpeningHours] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const [weekDayNumber, setWeekDayNumber] = useState(0);
+    const [newsletterMail, setNewsletterMail] = useState("");
+    const { accessToken, user } = useAuth()
 
     useEffect(() => {
         getAllOpeningHours()
@@ -82,13 +87,25 @@ function Footer() {
 
 
 
-
+    const signInToNewsletter = () => {
+        if(newsletterMail.length > 5) {
+            setNewsletterMail("");
+            toast.success("Zapisano do newslettera!", {
+                className: 'min-w-[450px]',
+            });
+        }
+        else {
+            toast.error("Wprowadzony adres e-mail jest błędny!", {
+                className: 'min-w-[450px]',
+            });
+        }
+    }
 
 
     return (
         <div className="bg-amber-50 ">
-            <div className="grid grid-cols-5 mx-auto py-3 text-footertext text-lg">
-                <div className="flex flex-col text-center items-center">
+            <div className="grid grid-cols-6 mx-auto pt-3 pb-5 text-footertext text-lg">
+                <div className="flex flex-col text-center items-center ">
                     <p className="font-serif text-logotext text-2xl mt-6">Pałac smaku</p>
                     <p>NIP: 1234567899</p>
                     <p>Ignacego Paderewskiego 6</p>
@@ -109,7 +126,12 @@ function Footer() {
                         <p>Kontakt</p>
                     </button>
                     <button>
-                        <p>Logowanie</p>
+                        {(!user && !accessToken) && (
+                            <p>Logowanie</p>
+                        )}
+                        {(user && accessToken) && (
+                            <p>Moje konto</p>
+                        )}
                     </button>
                 </div>
                 <div className="flex flex-col">
@@ -130,7 +152,7 @@ function Footer() {
                         <p>Mapa strony</p>
                     </button>
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col col-span-2 px-24">
                     <h1 className="text-center font-serif text-logotext text-xl mb-1">GODZINY OTWARCIA</h1>
                     {groupedOpeningHours.length === 0 && (
                         <p>Brak informacji o godzinach otwarcia</p>
@@ -153,9 +175,9 @@ function Footer() {
                         </div>
                     ))}
                 </div>
-                <div className="flex flex-col">
-                    <h1 className="text-center font-serif text-logotext text-xl mb-6">OBSERWUJ NAS</h1>
-                    <div className="flex justify-center  gap-5">
+                <div className="flex flex-col items-center">
+                    <h1 className="text-center font-serif text-logotext text-xl mb-3">OBSERWUJ NAS</h1>
+                    <div className="flex justify-center  gap-6 mb-5">
                         <button className="border-2 rounded-full border-footertext p-2 hover:bg-footertext hover:text-amber-50">
                             <FaFacebook className="w-8 h-auto"/>
                         </button>
@@ -166,10 +188,25 @@ function Footer() {
                             <FaTiktok className="w-8 h-auto"/>
                         </button>
                     </div>
+                    <label className="text-center">Zapisz się do newslettera:</label>
+                    <div className="flex justify-center border-b border-footertext w-4/5 px-10 pb-0.5">
+                        <input
+                            className="placeholder:text-footertext placeholder:opacity-80"
+                            type="text"
+                            name="email"
+                            placeholder="Adres e-mail"
+                            value={newsletterMail}
+                            onChange={(e) => setNewsletterMail(e.target.value)}
+                        />
+                        <button className="cursor-pointer border-2 border-footertext  rounded-full hover:bg-footertext hover:text-amber-50" onClick={() => signInToNewsletter()}>
+                            <ArrowRight className="hover:scale-125"/>
+                        </button>
+                    </div>
                 </div>
+                <div/>
             </div>
             <div className="border-t flex justify-between px-10 py-2 text-footertext">
-                <p>© 2024 Pałac smaku. Wszelkie prawa zastrzeżone.</p>
+                <p>© {new Date().getFullYear()} Pałac smaku. Wszelkie prawa zastrzeżone.</p>
                 <p>Realizacja: Dawid Baska</p>
             </div>
         </div>

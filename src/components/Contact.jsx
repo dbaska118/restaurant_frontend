@@ -1,6 +1,7 @@
 import Menu from "./Menu.jsx";
 import React, {useState} from "react";
 import {toast, ToastContainer} from 'react-toastify';
+import Footer from "./Footer.jsx";
 
 function Contact() {
     const [email, setEmail] = useState("");
@@ -93,6 +94,7 @@ function Contact() {
                     referrerPolicy="no-referrer-when-downgrade">
                 </iframe>
             </div>
+            <Footer/>
         </div>
     )
 }
