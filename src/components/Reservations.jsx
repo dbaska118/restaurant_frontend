@@ -8,11 +8,9 @@ function Reservations() {
     return (
         <div>
             <ToastContainer position="top-center" className="text-xl" autoClose={3000} theme="light"/>
-            <Menu/>
             <div className="mx-10 mt-52 mb-16">
                 <h1 className="text-center">Rezerwacje</h1>
             </div>
-            <Footer/>
         </div>
     )
 }

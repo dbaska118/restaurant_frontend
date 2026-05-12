@@ -29,7 +29,6 @@ function Contact() {
     return (
         <div>
             <ToastContainer position="top-center" className="text-xl" autoClose={3000} theme="light"/>
-            <Menu/>
             <div className="mx-10 mt-52 mb-16">
                 <h2 className="text-4xl font-semibold text-center">Skontaktuj się z nami!</h2>
                 <div className="grid grid-cols-2 mt-10 mb-10">
@@ -94,7 +93,6 @@ function Contact() {
                     referrerPolicy="no-referrer-when-downgrade">
                 </iframe>
             </div>
-            <Footer/>
         </div>
     )
 }

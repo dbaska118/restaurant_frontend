@@ -94,7 +94,7 @@ function UserPanel() {
         <div>
             <Menu/>
             <ToastContainer position="top-center" className="text-xl" autoClose={3000} theme="light"/>
-            <div className="mt-52 mx-10">
+            <div className="mt-52 mx-10 mb-20">
                 <div className="flex justify-between">
                     <h2 className="text-4xl font-semibold">{name === undefined ? 'Błąd pobrania imienia i nazwiska!' : `Witaj, ${name.firstName} ${name.lastName}!`}</h2>
                     <ProfileButtons />

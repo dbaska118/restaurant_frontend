@@ -5,6 +5,7 @@ import React from "react";
 import {CookingPot, User, Clock, Coins} from "lucide-react"
 import { Icon } from 'lucide-react';
 import { chairsTablePlatter } from '@lucide/lab';
+import Footer from "../Footer.jsx";
 
 
 function AdminPanel() {
@@ -19,7 +20,6 @@ function AdminPanel() {
 
     return (
         <div>
-            <Menu/>
             <div className="mt-52 mx-10">
                 <div className="flex justify-between">
                     <h2 className="text-4xl font-semibold">Panel administratora</h2>

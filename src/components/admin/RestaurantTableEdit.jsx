@@ -128,7 +128,6 @@ function RestaurantTableEdit() {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <Menu/>
             <ToastContainer position="top-center" className="text-xl" autoClose={3000} theme="light"/>
             <div className="relative w-full min-h-screen flex justify-center pt-52 pb-20">
                 <div className="absolute inset-0 bg-repeat bg-[url('/utensils-crossed.svg')] z-0"></div>

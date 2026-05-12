@@ -3,6 +3,7 @@ import MainPage from "./MainPage.jsx";
 import React, {useEffect} from "react";
 import {getAllDishes} from "../api/dishAPI.js";
 import Footer from "./Footer.jsx";
+import {ToastContainer} from "react-toastify";
 
 
 function DishMenu() {
@@ -37,7 +38,7 @@ function DishMenu() {
 
     return (
         <div>
-            <Menu/>
+            <ToastContainer position="top-center" className="text-xl" autoClose={3000} theme="light"/>
             <div className="mx-10 mt-56">
                 <div className="flex gap-5 justify-center mb-16 border-2 border-logotext px-2 py-8">
                     <button onClick={() => scrollTo(soupRef)}  className="w-1/4 text-3xl text-logotext font-serif hover:text-logotexthover hover:cursor-pointer hover:underline underline-offset-4">ZUPY</button>
@@ -102,7 +103,7 @@ function DishMenu() {
                     <div className="absolute inset-0 bg-black/50"></div>
                     <h2 className="relative z-10 text-white text-8xl font-serif tracking-widest">NAPOJE</h2>
                 </div>
-                <div className="flex flex-col items-center w-full mt-10 mb-20">
+                <div className="flex flex-col items-center w-full mt-10">
                     {drink.map((dish, index) => (
                         <div key={dish.id} className="w-2/3 flex-col">
                             <div className="flex justify-between">
@@ -116,7 +117,6 @@ function DishMenu() {
                     ))}
                 </div>
             </div>
-            <Footer/>
         </div>
     )
 }
