@@ -4,6 +4,7 @@ import {FaInstagram, FaFacebook, FaTiktok} from "react-icons/fa";
 import {ArrowRight } from 'lucide-react';
 import {useAuth} from "../AuthContext.jsx";
 import {toast} from "react-toastify";
+import {useNavigate} from "react-router-dom";
 
 function Footer() {
     const [groupedOpeningHours, setGroupedOpeningHours] = useState([]);
@@ -11,6 +12,7 @@ function Footer() {
     const [weekDayNumber, setWeekDayNumber] = useState(0);
     const [newsletterMail, setNewsletterMail] = useState("");
     const { accessToken, user } = useAuth()
+    const navigate = useNavigate();
 
     useEffect(() => {
         getAllOpeningHours()
@@ -101,6 +103,23 @@ function Footer() {
         }
     }
 
+    const navigateToPage = (source) => {
+        window.scroll(0, 0)
+        navigate(source);
+    }
+
+    const AccountClick = async () => {
+        if(!accessToken || !user) {
+            navigate("/login");
+        }
+        else if(user.role === "client"){
+            navigate("/userpanel");
+        }
+        else if(user.role === "admin" || user.role === "headAdmin"){
+            navigate("/adminpanel");
+        }
+    }
+
 
     return (
         <div className="bg-amber-50 ">
@@ -113,19 +132,19 @@ function Footer() {
                 </div>
                 <div className="flex flex-col">
                     <h1 className="text-center font-serif text-logotext text-xl mb-1">NAWIGACJA</h1>
-                    <button>
+                    <button className="hover:text-logotext hover:underline hover:underline-offset-6 cursor-pointer" onClick={() => navigateToPage("/")}>
                         <p>Strona główna</p>
                     </button>
-                    <button>
+                    <button className="hover:text-logotext hover:underline hover:underline-offset-6 cursor-pointer" onClick={() => navigateToPage("/dishes")}>
                         <p>Karta dań</p>
                     </button>
-                    <button>
+                    <button className="hover:text-logotext hover:underline hover:underline-offset-6 cursor-pointer" onClick={() => navigateToPage("/reservations")}>
                         <p>Rezerwacje</p>
                     </button>
-                    <button>
+                    <button className="hover:text-logotext hover:underline hover:underline-offset-6 cursor-pointer" onClick={() => navigateToPage("/contact")}>
                         <p>Kontakt</p>
                     </button>
-                    <button>
+                    <button className="hover:text-logotext hover:underline hover:underline-offset-6 cursor-pointer" onClick={() => AccountClick()}>
                         {(!user && !accessToken) && (
                             <p>Logowanie</p>
                         )}
@@ -136,19 +155,19 @@ function Footer() {
                 </div>
                 <div className="flex flex-col">
                     <h1 className="text-center font-serif text-logotext text-xl mb-1">POMOC</h1>
-                    <button>
+                    <button className="hover:text-logotext hover:underline hover:underline-offset-6 cursor-pointer">
                         <p>Polityka prywatności</p>
                     </button>
-                    <button>
+                    <button className="hover:text-logotext hover:underline hover:underline-offset-6 cursor-pointer">
                         <p>Regulamin rezerwacji</p>
                     </button>
-                    <button>
+                    <button className="hover:text-logotext hover:underline hover:underline-offset-6 cursor-pointer">
                         <p>Alergeny w posiłkach</p>
                     </button>
-                    <button>
+                    <button className="hover:text-logotext hover:underline hover:underline-offset-6 cursor-pointer">
                         <p>Często zadawane pytania (FAQ)</p>
                     </button>
-                    <button>
+                    <button className="hover:text-logotext hover:underline hover:underline-offset-6 cursor-pointer">
                         <p>Mapa strony</p>
                     </button>
                 </div>
@@ -178,13 +197,19 @@ function Footer() {
                 <div className="flex flex-col items-center">
                     <h1 className="text-center font-serif text-logotext text-xl mb-3">OBSERWUJ NAS</h1>
                     <div className="flex justify-center  gap-6 mb-5">
-                        <button className="border-2 rounded-full border-footertext p-2 hover:bg-footertext hover:text-amber-50">
+                        <button
+                            onClick={() => window.open("https://www.facebook.com/", "_blank", "noopener,noreferrer")}
+                            className="cursor-pointer border-2 rounded-full border-footertext p-2 hover:bg-footertext hover:text-amber-50">
                             <FaFacebook className="w-8 h-auto"/>
                         </button>
-                        <button className="border-2 rounded-full border-footertext p-2 hover:bg-footertext hover:text-amber-50">
+                        <button
+                            onClick={() => window.open("https://www.instagram.com", "_blank", "noopener,noreferrer")}
+                            className="cursor-pointer border-2 rounded-full border-footertext p-2 hover:bg-footertext hover:text-amber-50">
                             <FaInstagram className="w-8 h-auto"/>
                         </button>
-                        <button className="border-2 rounded-full border-footertext p-2 hover:bg-footertext hover:text-amber-50">
+                        <button
+                            onClick={() => window.open("https://www.tiktok.com/pl-PL/", "_blank", "noopener,noreferrer")}
+                            className="cursor-pointer border-2 rounded-full border-footertext p-2 hover:bg-footertext hover:text-amber-50">
                             <FaTiktok className="w-8 h-auto"/>
                         </button>
                     </div>

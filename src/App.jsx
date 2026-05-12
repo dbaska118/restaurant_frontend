@@ -15,6 +15,7 @@ import UserEdit from "./components/admin/UserEdit.jsx";
 import OpeningHours from "./components/admin/OpeningHours.jsx";
 import TablePriceEdit from "./components/admin/TablePriceEdit.jsx";
 import RestaurantTableEdit from "./components/admin/RestaurantTableEdit.jsx";
+import Reservations from "./components/Reservations.jsx";
 
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
                     <Route path="/register" element={<Register />} />
                     <Route path="/changePassword" element={<ChangePassword />} />
                     <Route path="/changeName" element={<ChangeName />} />
+                    <Route path="/reservations" element={<Reservations />} />
                     <Route path="/userpanel" element={<UserPanel/>} />
                     <Route path="/adminpanel" element={<AdminPanel/>} />
                     <Route path="/admin/dishes" element={<DishEdit/>} />

@@ -28,7 +28,7 @@ function Menu() {
             <button onClick={() => navigateToPage("/dishes")} className="-mt-10 hover:text-logotexthover hover:underline hover:underline-offset-4 cursor-pointer">
                 MENU
             </button>
-            <button onClick={() => navigateToPage("/dishes")} className="-mt-10 hover:text-logotexthover hover:underline hover:underline-offset-4 cursor-pointer">
+            <button onClick={() => navigateToPage("/reservations")} className="-mt-10 hover:text-logotexthover hover:underline hover:underline-offset-4 cursor-pointer">
                 REZERWACJE
             </button>
             <button onClick={() => navigateToPage("/")}>
