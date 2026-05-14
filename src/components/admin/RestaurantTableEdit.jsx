@@ -45,6 +45,7 @@ function RestaurantTableEdit() {
         if(editMode) {
             try {
                 const response = await updateRestaurantTable(formData.id, formData);
+                console.log(response)
                 toast.success('Edytowano stolik!', {
                     className: 'min-w-[450px]',
                 });
@@ -61,6 +62,18 @@ function RestaurantTableEdit() {
                     toast.error('Wpis w cenniku rezerwacji dla podanej liczby miejsc nie istnieje!', {
                         className: 'min-w-[450px]',
                     });
+                }
+                else if(error.status === 409) {
+                    toast.error('Ktoś inny dokonał edycji stolika, spróbuj ponownie!', {
+                        className: 'min-w-[450px]',
+                    });
+                    const update = await getAllRestaurantTable();
+                    setRestaurantTable(update);
+                    setEditMode(false);
+                    setFormData({
+                        name: "",
+                        numberOfChairs: possibleNumberOfChairs[0],
+                    })
                 }
                 else {
                     toast.error('Błąd edycji stolika!', {
@@ -202,6 +215,7 @@ function RestaurantTableEdit() {
                                                 <button onClick={() => handleDelete(table)} className="cursor-pointer flex items-center gap-1 text-red-500 hover:text-red-700"> <Trash/> Usuń</button>
                                             </div>
                                         </div>
+                                        <p className={`text-2xl ${table.status === "FREE" ? `text-green-600` : `text-red-600`} `}>{table.status === "FREE" ? "Wolny" : "Zajęty"}</p>
                                     </div>
                                 ))}
                             </div>
