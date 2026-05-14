@@ -17,6 +17,8 @@ import TablePriceEdit from "./components/admin/TablePriceEdit.jsx";
 import RestaurantTableEdit from "./components/admin/RestaurantTableEdit.jsx";
 import Reservations from "./components/Reservations.jsx";
 import Layout from "./components/Layout.jsx";
+import EmployeePanel from "./components/employee/EmployeePanel.jsx";
+import RestaurantTableStatusEdit from "./components/employee/RestaurantTableStatusEdit.jsx";
 
 
 function App() {
@@ -40,6 +42,8 @@ function App() {
                         <Route path="/admin/openingHours" element={<OpeningHours/>} />
                         <Route path="/admin/tablePrice" element={<TablePriceEdit/>} />
                         <Route path="/admin/restaurantTable" element={<RestaurantTableEdit />} />
+                        <Route path="/employeepanel" element={<EmployeePanel/>} />
+                        <Route path="/employee/restaurantablestatus" element={<RestaurantTableStatusEdit />} />
                     </Routes>
                 </Layout>
             </Router>

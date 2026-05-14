@@ -146,7 +146,7 @@ function RestaurantTableEdit() {
                 <div className="absolute inset-0 bg-repeat bg-[url('/utensils-crossed.svg')] z-0"></div>
                 <div className="relative w-3/4 z-10">
                     <div className="bg-white flex flex-col border-3  border-logotext rounded-xl py-6 px-12 text-2xl mb-20">
-                        <h1 className="text-4xl font-semibold text-center mb-5">Cennik rezerwacji</h1>
+                        <h1 className="text-4xl font-semibold text-center mb-5">Zarządzanie stolikami</h1>
                         <form onSubmit={(e) => handleSubmit(e)}>
                             <div className="grid grid-cols-2 gap-10">
                                 <div className="flex flex-col">

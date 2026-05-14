@@ -65,7 +65,6 @@ function Footer() {
                    }
                }
             }
-            console.log(grouppedHours)
             setGroupedOpeningHours(grouppedHours)
         }
     }
@@ -117,6 +116,9 @@ function Footer() {
         }
         else if(user.role === "admin" || user.role === "headAdmin"){
             navigate("/adminpanel");
+        }
+        else if(user.role === "employee"){
+            navigate("/employeepanel");
         }
     }
 

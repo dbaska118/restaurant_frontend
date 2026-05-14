@@ -21,6 +21,9 @@ function Menu() {
         else if(user.role === "admin" || user.role === "headAdmin"){
             navigate("/adminpanel");
         }
+        else if(user.role === "employee"){
+            navigate("/employeepanel");
+        }
     }
 
     return (
