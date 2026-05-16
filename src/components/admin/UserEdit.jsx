@@ -112,7 +112,7 @@ function UserEdit() {
                 });
             } catch(error) {
                 console.log(error)
-                if(error.response.status === 404) {
+                if(error.status === 404) {
                     toast.error("Nie znaleziono konta administratora!", {
                         className: 'min-w-[450px]',
                     });
@@ -138,7 +138,7 @@ function UserEdit() {
                 });
             } catch(error) {
                 console.log(error)
-                if(error.response.status === 404) {
+                if(error.status === 404) {
                     toast.error("Nie znaleziono konta użytkownika!", {
                         className: 'min-w-[450px]',
                     });

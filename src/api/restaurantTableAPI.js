@@ -43,3 +43,14 @@ export const updateRestaurantTable = async (id, data) => {
         throw error;
     }
 }
+
+export const updateRestaurantTableStatus = async (id, data) => {
+    try {
+        const response = await api.patch(`/restaurantTable/${id}/status`, data);
+        return response.data;
+    }
+    catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
