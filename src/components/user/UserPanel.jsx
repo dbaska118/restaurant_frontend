@@ -1,12 +1,29 @@
 import Menu from "../Menu.jsx";
 import ProfileButtons  from "../ProfileButtons.jsx";
-import React, {useEffect} from "react";
-import {Ban, CirclePlus} from "lucide-react"
+import React, {useEffect, useState} from "react";
+import {Ban, CirclePlus, Trash2} from "lucide-react"
 import {useNavigate} from "react-router-dom";
 import {useAuth} from "../../AuthContext.jsx";
 import {getClientBalance, getName} from "../../api/userAPI.js";
 import {addFunds, getAllBalanceOperation} from "../../api/balanceOperationAPI.js";
 import {toast, ToastContainer} from "react-toastify";
+import {getAllReservationsByEmail} from "../../api/reservationAPI.js";
+import {Eye, EyeOff} from "lucide-react";
+
+const SecretCode = ({ code }) => {
+    const [isVisible, setIsVisible] = useState(false);
+
+    return (
+        <div className="flex justify-center items-center gap-2">
+            <p className="text-2xl">
+                Kod rezerwacji: <span className="font-semibold" > {isVisible ? code : "••••••"} </span>
+            </p>
+            <button onClick={() => setIsVisible(!isVisible)} className="text-gray-600 hover:text-black hover:cursor-pointer">
+                {isVisible ? <EyeOff /> : <Eye />}
+            </button>
+        </div>
+    );
+};
 
 function UserPanel() {
     const [reservations, setReservations] = React.useState([]);
@@ -43,6 +60,19 @@ function UserPanel() {
     useEffect(() => {
         if (!user?.email) return;
 
+        getAllReservationsByEmail(user.email)
+            .then((response) => {
+                setReservations(response);
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+    }, [user?.email]);
+
+    useEffect(() => {
+        if (!user?.email) return;
+
         getName(user.email)
             .then((response) => {
                 setName(response);
@@ -59,7 +89,7 @@ function UserPanel() {
        getAllBalanceOperation(user.email)
             .then((response) => {
                 setBalanceOperations(response);
-                console.log(response);
+
             })
             .catch((error) => {
                 console.log(error)
@@ -129,6 +159,46 @@ function UserPanel() {
                                     <Ban className="w-44 h-44 mb-10"/>
                                     <h1 className="text-4xl font-semibold mb-4">Nie znaleziono rezerwacji!</h1>
                                     <p className="text-3xl">Przejdź do <button onClick={() => navigateToPage("/dishes")} className="cursor-pointer hover:text-logotexthover">podstrony rezerwacji</button>, aby dokonać nowej.</p>
+                                </div>
+                            )}
+                            {reservations.length > 0 && (
+                                <div>
+                                    {reservations
+                                        .sort((a,b) => new Date(a.startTime) - new Date(b.startTime))
+                                        .map(reservation => (
+                                        <div key={reservation.id} className="flex flex-col border border-footertext bg-amber-50 mt-6 p-3 rounded-xl text-2xl">
+                                            <div className="text-center w-full mb-4">
+                                                <h1>{reservation.name}
+                                                    {"Data rezerwacji: "}
+                                                    <span className="font-semibold">
+                                                        {new Date(reservation.startTime).toLocaleString('pl-PL', {
+                                                            day: '2-digit',
+                                                            month: '2-digit',
+                                                            year: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })}
+                                                        {" - "}
+                                                        {new Date(reservation.endTime).toLocaleString('pl-PL', {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })}
+                                                    </span>
+                                                </h1>
+                                            </div>
+                                            <div className="grid grid-cols-2 text-center mb-4">
+                                                <p>Ilość miejsc: <span className="font-semibold">{reservation.numberOfChairs}</span> </p>
+                                                <p>Cena rezerwacji: <span className="font-semibold"> {reservation.price} zł </span> </p>
+                                            </div>
+                                            <SecretCode code={reservation.reservationCode} />
+                                            <div className="flex justify-center mt-4">
+                                                <button className="flex items-center justify-center gap-2 w-1/2 mt-2 p-3 border-2 border-red-200 text-red-600 bg-red-50/30 rounded-xl text-xl  hover:bg-red-600 hover:text-white hover:cursor-pointer">
+                                                    <Trash2 size={20} />
+                                                    Anuluj rezerwację
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </div>
