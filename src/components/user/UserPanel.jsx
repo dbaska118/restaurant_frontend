@@ -7,7 +7,7 @@ import {useAuth} from "../../AuthContext.jsx";
 import {getClientBalance, getName} from "../../api/userAPI.js";
 import {addFunds, getAllBalanceOperation} from "../../api/balanceOperationAPI.js";
 import {toast, ToastContainer} from "react-toastify";
-import {getAllReservationsByEmail} from "../../api/reservationAPI.js";
+import {getAllReservationsByEmail, cancelReservationClient} from "../../api/reservationAPI.js";
 import {Eye, EyeOff} from "lucide-react";
 
 const SecretCode = ({ code }) => {
@@ -37,6 +37,9 @@ function UserPanel() {
         email: user?.email || null,
         amount: 10,
     });
+    const [cancelingReservation, setCancelingReservation] = React.useState(false);
+    const [cancelReservationId, setCancelReservationId] = React.useState(null);
+    const [refund, setRefund] = React.useState(0);
 
 
     const navigateToPage = (source) => {
@@ -120,6 +123,67 @@ function UserPanel() {
 
     }
 
+    const cancelReservationConfirm = (reservation) => {
+        setCancelingReservation(true);
+        setCancelReservationId(reservation.id)
+
+        const diffInHours = (new Date(reservation.startTime) - new Date()) / (1000 * 60 * 60);
+        if (diffInHours > 24) {
+            setRefund(reservation.price)
+        }
+        else if (diffInHours > 12) {
+            setRefund(reservation.price * 0.75)
+        }
+        else if (diffInHours > 6) {
+            setRefund(reservation.price * 0.5)
+        }
+        else {
+            setRefund(reservation.price * 0.2)
+        }
+    }
+
+    const backReservationCancel = () => {
+        setCancelingReservation(false);
+        setCancelReservationId(null);
+        setRefund(0);
+    }
+
+    const handleCancelReservation = async (e) => {
+        e.preventDefault();
+        try {
+            console.log(cancelReservationId);
+            const response = await cancelReservationClient(cancelReservationId);
+            setBalanceOperations((prevState) => [...prevState, response]);
+            setReservations(prevState => prevState.filter(reservation => reservation.id !== cancelReservationId));
+            setBalance(response.balanceAfter)
+            toast.success("Anulowano rezerwację!", {
+                className: 'min-w-[450px]',
+            });
+        }
+        catch (error) {
+            if(error.status === 404) {
+                toast.error('Nie znaleziono rezerwacji!', {
+                    className: 'min-w-[450px]',
+                });
+            }
+            else if (error.status === 400) {
+                toast.error('Czas na anulowanie rezerwacji minął!', {
+                    className: 'min-w-[450px]',
+                });
+            }
+            else {
+                toast.error('Błąd anulowania rezerwacji!', {
+                    className: 'min-w-[450px]',
+                });
+            }
+        }
+        setTimeout(() => {
+            setCancelReservationId(null);
+            setCancelingReservation(false);
+            setRefund(0);
+        }, 1500);
+    }
+
     return (
         <div>
             <Menu/>
@@ -145,6 +209,20 @@ function UserPanel() {
                             />
                             <button type="submit"  className="w-full mb-6 border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Dodaj środki</button>
                             <button type="button" onClick={() => setAddingBalance(false)} className="w-full border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Anuluj doładowanie</button>
+                        </form>
+                    </div>
+                )}
+                {cancelingReservation && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                        <form onSubmit={handleCancelReservation} className="w-full max-w-[750px] bg-white flex flex-col border-3  border-logotext rounded-xl pt-6 pb-12  px-12 text-2xl">
+                            <h3 className="text-4xl font-bold mb-6 text-center">Anluj rezerwację</h3>
+                            <label className="mb-2 text-center">Czy jesteś pewny, że chcesz anulować rezerwację?</label>
+                            <label className="mb-2 text-center">Otrzymasz zwrot: <span className="font-semibold">{refund} zł</span> </label>
+                            <button className="hover:text-logotext hover:underline hover:underline-offset-6 cursor-pointer mb-4">
+                                <p>Sprawdź regulamin rezerwacji</p>
+                            </button>
+                            <button type="submit"  className="w-full mb-6 border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Anluj rezerwację</button>
+                            <button type="button" onClick={() => backReservationCancel()} className="w-full border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Powrót</button>
                         </form>
                     </div>
                 )}
@@ -192,7 +270,7 @@ function UserPanel() {
                                             </div>
                                             <SecretCode code={reservation.reservationCode} />
                                             <div className="flex justify-center mt-4">
-                                                <button className="flex items-center justify-center gap-2 w-1/2 mt-2 p-3 border-2 border-red-200 text-red-600 bg-red-50/30 rounded-xl text-xl  hover:bg-red-600 hover:text-white hover:cursor-pointer">
+                                                <button onClick={() => cancelReservationConfirm(reservation)} className="flex items-center justify-center gap-2 w-1/2 mt-2 p-3 border-2 border-red-200 text-red-600 bg-red-50/30 rounded-xl text-xl  hover:bg-red-600 hover:text-white hover:cursor-pointer">
                                                     <Trash2 size={20} />
                                                     Anuluj rezerwację
                                                 </button>

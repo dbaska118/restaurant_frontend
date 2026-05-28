@@ -9,3 +9,13 @@ export const getAllReservationsByEmail = async (email) => {
         throw error;
     }
 }
+
+export const cancelReservationClient = async (id) => {
+    try {
+        const response = await api.post(`/reservation/client/cancel/${id}`);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
