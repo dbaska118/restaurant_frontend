@@ -1,14 +1,20 @@
 import {ToastContainer} from "react-toastify";
 import React, {useEffect} from "react";
 import {getAllTablePrice} from "../api/tablePriceAPI.js";
+import {getAllOpeningHours} from "../api/openingHoursAPI.js";
 
 
 function Reservations() {
     const [tablePriceList, setTablePriceList] = React.useState([]);
     const [findFreeTables, setFindFreeTables] = React.useState({
         minNumberOfChairs: 0,
+        reservationDay: 0,
+        reservationStartTime: "",
+        reservationLength: 2,
+
     });
     const [findMode, setFindMode] = React.useState(false);
+    const [openHours, setOpenHours] = React.useState([]);
 
     useEffect(() => {
         getAllTablePrice()
@@ -21,14 +27,48 @@ function Reservations() {
             })
     },[])
 
+    useEffect(() => {
+        getAllOpeningHours()
+            .then(result => {
+               setOpenHours(result);
+               console.log(result);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    },[])
+
     const openFindModeCard = (price) => {
-        setFindFreeTables({...findFreeTables, minNumberOfChairs: price.numberOfChairs});
-        setFindMode(true);
+        const numberOfChairs = Number(price.numberOfChairs);
+        openFindMode(numberOfChairs)
     }
 
     const openFindModeButton = () => {
-        setFindMode(true);
+        const numberOfChairs = Math.min(...tablePriceList.map(item => item.numberOfChairs));
+        openFindMode(numberOfChairs);
     }
+
+    const openFindMode = (chairs) => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const dayIndex = tomorrow.getDay() === 0 ? 7 : tomorrow.getDay();
+        const openDay = openHours.find(day => day.dayOrder === dayIndex);
+        setFindMode(true);
+        setFindFreeTables({
+            ...findFreeTables,
+            minNumberOfChairs: chairs,
+            reservationStartTime: openDay.openTime,
+            reservationDay: tomorrow.toISOString().split('T')[0]
+        })
+    }
+
+    const getTomorrowDate = () => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return tomorrow.toISOString().split('T')[0];
+    };
+
+
 
     return (
         <div>
@@ -42,19 +82,40 @@ function Reservations() {
                 </div>
                 {findMode && (
                     <div>
-                        <p>{findFreeTables.minNumberOfChairs}</p>
+                        <h1 className="text-4xl text-logotext text-center mt-10 mb-4 font-serif">WYSZUKIWARKA TERMINÓW</h1>
+                        <div className="flex ">
+                            <div className="flex flex-col">
+                                <label>Liczba krzeseł:</label>
+                                <select value={findFreeTables.minNumberOfChairs} onChange={(e) => setFindFreeTables({...findFreeTables, minNumberOfChairs: Number(e.target.value)})}>
+                                    {tablePriceList.map(item => (
+                                        <option key={item.id} value={item.numberOfChairs}>{item.numberOfChairs}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex flex-col">
+                                <label>Dzień rezerwacji:</label>
+                                <input
+                                    type="date"
+                                    value={findFreeTables.reservationDay}
+                                    min={getTomorrowDate()}
+                                    onChange={(e) => setFindFreeTables({...findFreeTables, reservationDay: e.target.value})}
+                                />
+                            </div>
+                        </div>
                     </div>
                 )}
                 <div>
-                    <h1 className="text-4xl text-logotext text-center mt-10 font-serif">CENNIK REZERWACJI</h1>
-                    <div className="flex flex-col items-center py-2 mb-8">
-                        <p className="text-2xl text-gray-600 mb-4 italic">Chcesz sprawdzić dostępność?</p>
-                        <button
-                            onClick={openFindModeButton}
-                            className="tracking-wide px-10 py-4 border-2 border-logotext text-logotext text-xl rounded-2xl hover:bg-logotext hover:text-white  cursor-pointer font-semibold">
-                            Otwórz wyszukiwarkę terminów
-                        </button>
-                    </div>
+                    <h1 className="text-4xl text-logotext text-center mt-10 mb-4 font-serif">CENNIK REZERWACJI</h1>
+                    {!findMode && (
+                        <div className="flex flex-col items-center pb-2 mb-8">
+                            <p className="text-2xl text-gray-600 mb-4 italic">Chcesz sprawdzić dostępność?</p>
+                            <button
+                                onClick={openFindModeButton}
+                                className="tracking-wide px-10 py-4 border-2 border-logotext text-logotext text-xl rounded-2xl hover:bg-logotext hover:text-white  cursor-pointer font-semibold">
+                                Otwórz wyszukiwarkę terminów
+                            </button>
+                        </div>
+                    )}
                     <div className="grid grid-cols-3 gap-16 mx-auto w-3/4 mb-10">
                         {tablePriceList.map((price) => (
                             <button key={price.id}
