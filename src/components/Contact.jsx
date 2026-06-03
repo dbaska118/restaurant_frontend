@@ -56,7 +56,7 @@ function Contact() {
                         <div className="flex flex-col text-2xl">
                             <label>Adres e-mail:</label>
                             <input
-                                className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-4 outline-none focus:border-logotexthover"
+                                className="border-2 border-logotext rounded-2xl p-3 text-xl mt-1 mb-4 outline-none focus:border-logotexthover"
                                 type="text"
                                 name="email"
                                 placeholder="Adres e-mail"
@@ -65,7 +65,7 @@ function Contact() {
 
                             <label>Temat:</label>
                             <input
-                                className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-4 outline-none focus:border-logotexthover"
+                                className="border-2 border-logotext rounded-2xl p-3 text-xl mt-1 mb-4 outline-none focus:border-logotexthover"
                                 type="text"
                                 name="topic"
                                 placeholder="Temat"
@@ -74,14 +74,14 @@ function Contact() {
 
                             <label>Wiadomość:</label>
                             <textarea
-                                className="border-2 border-logotext rounded-xl p-3 text-xl mt-1 mb-10 outline-none focus:border-logotexthover"
+                                className="border-2 border-logotext rounded-2xl p-3 text-xl mt-1 mb-10 outline-none focus:border-logotexthover"
                                 name="message"
                                 value={message}
                                 rows={5}
                                 placeholder="Twoja wiadomość"
                                 onChange={(e) => setMessage(e.target.value)} />
 
-                            <button type="submit"  className="border-2 p-3 border-logotext bg-amber-50 rounded-xl text-2xl text-logotext  hover:text-logotexthover hover:cursor-pointer hover:border-logotexthover">Wyślij wiadomość</button>
+                            <button type="submit"  className="tracking-wide px-10 py-4 border-2 border-logotext text-logotext text-xl rounded-2xl hover:bg-logotext hover:text-white  cursor-pointer font-semibold">Wyślij wiadomość</button>
                         </div>
                     </form>
                 </div>
