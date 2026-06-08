@@ -15,6 +15,8 @@ function Reservations() {
     });
     const [findMode, setFindMode] = React.useState(false);
     const [openHours, setOpenHours] = React.useState([]);
+    const [reservationHours, setReservationHours] = React.useState([]);
+    const [reservationLengths, setReservationLengths] = React.useState([]);
 
     useEffect(() => {
         getAllTablePrice()
@@ -38,6 +40,56 @@ function Reservations() {
             })
     },[])
 
+
+    useEffect(() => {
+        if (!openHours.length || !findFreeTables.reservationDay) return;
+
+
+        const selectedDay = new Date(findFreeTables.reservationDay);
+        const dayIndex = selectedDay.getDay() === 0 ? 7 : selectedDay.getDay();
+        const openDay = openHours.find(day => day.dayOrder === dayIndex);
+
+        if (!openDay) return;
+
+        const openHour = parseInt(openDay.openTime.split(':')[0]);
+        const closeHour = parseInt(openDay.closeTime.split(':')[0]);
+        const timeSlots = [];
+        const interval = 2;
+        for (let hour = openHour; hour < closeHour; hour += interval) {
+            if (hour + interval > closeHour) break;
+            const formattedHour = hour < 10 ? `0${hour}:00` : `${hour}:00`;
+            timeSlots.push(formattedHour);
+        }
+        setReservationHours(timeSlots);
+
+
+        let currentStartTime = findFreeTables.reservationStartTime;
+        if (!timeSlots.includes(currentStartTime) && timeSlots.length > 0) {
+            currentStartTime = timeSlots[0];
+        }
+
+
+        const currentStartHour = parseInt(currentStartTime.split(':')[0]);
+        const hoursLeft = closeHour - currentStartHour;
+
+        const basicLength = [2, 4, 6, 8];
+        const filteredLengths = basicLength.filter(length => length <= hoursLeft);
+        setReservationLengths(filteredLengths);
+
+        setFindFreeTables(prev => {
+            let nextLength = prev.reservationLength;
+            if (!filteredLengths.includes(Number(nextLength))) {
+                nextLength = filteredLengths.length > 0 ? Math.min(...filteredLengths) : 2;
+            }
+            return {
+                ...prev,
+                reservationStartTime: currentStartTime,
+                reservationLength: Number(nextLength)
+            };
+        });
+
+    }, [findFreeTables.reservationDay, findFreeTables.reservationStartTime, openHours]);
+
     const openFindModeCard = (price) => {
         const numberOfChairs = Number(price.numberOfChairs);
         openFindMode(numberOfChairs)
@@ -53,13 +105,23 @@ function Reservations() {
         tomorrow.setDate(tomorrow.getDate() + 1);
         const dayIndex = tomorrow.getDay() === 0 ? 7 : tomorrow.getDay();
         const openDay = openHours.find(day => day.dayOrder === dayIndex);
-        setFindMode(true);
-        setFindFreeTables({
-            ...findFreeTables,
-            minNumberOfChairs: chairs,
-            reservationStartTime: openDay.openTime,
-            reservationDay: tomorrow.toISOString().split('T')[0]
-        })
+        const cleanStartTime = openDay ? openDay.openTime.substring(0, 5) : "12:00";
+
+        if (findMode) {
+            setFindFreeTables({
+                ...findFreeTables,
+                minNumberOfChairs: chairs
+            })
+        }
+        else {
+            setFindMode(true);
+            setFindFreeTables({
+                ...findFreeTables,
+                minNumberOfChairs: chairs,
+                reservationStartTime: cleanStartTime,
+                reservationDay: tomorrow.toISOString().split('T')[0]
+            })
+        }
     }
 
     const getTomorrowDate = () => {
@@ -67,6 +129,65 @@ function Reservations() {
         tomorrow.setDate(tomorrow.getDate() + 1);
         return tomorrow.toISOString().split('T')[0];
     };
+
+    // const calculateReservationStart = () => {
+    //     const selectedDay = new Date(findFreeTables.reservationDay);
+    //     const dayIndex = selectedDay.getDay() === 0 ? 7 : selectedDay.getDay();
+    //     const openDay = openHours.find(day => day.dayOrder === dayIndex);
+    //
+    //     if(!openDay) {
+    //         return;
+    //     }
+    //
+    //
+    //     const openHour = parseInt(openDay.openTime.split(':')[0]);
+    //     const closeHour = parseInt(openDay.closeTime.split(':')[0]);
+    //
+    //     const timeSlots = []
+    //     const interval = 2
+    //     for (let hour = openHour; hour < closeHour; hour += interval) {
+    //         if(hour + interval > closeHour) {
+    //             break;
+    //         }
+    //         const formattedHour = hour < 10 ? '0' + hour + ':00' : hour + ":00";
+    //         timeSlots.push(formattedHour)
+    //     }
+    //     setReservationHours(timeSlots);
+    // }
+    //
+    // const calculateReservationLength = () => {
+    //     const basicLength = [2,4,6,8]
+    //     const selectedDay = new Date(findFreeTables.reservationDay);
+    //     const dayIndex = selectedDay.getDay() === 0 ? 7 : selectedDay.getDay();
+    //     const openDay = openHours.find(day => day.dayOrder === dayIndex);
+    //
+    //    if(!openDay || !findFreeTables.reservationDay || !findFreeTables.reservationStartTime) {
+    //        setReservationLengths(basicLength)
+    //        return
+    //    }
+    //
+    //     const openHour = parseInt(findFreeTables.reservationStartTime.split(':')[0]);
+    //     const closeHour = parseInt(openDay.closeTime.split(':')[0]);
+    //     const hoursLeft = closeHour - openHour;
+    //
+    //     const filteredLengths = basicLength.filter(length => length <= hoursLeft);
+    //     setReservationLengths(filteredLengths);
+    //
+    //     if (!filteredLengths.includes(Number(findFreeTables.reservationLength))) {
+    //         setFindFreeTables(prev => ({
+    //             ...prev,
+    //             reservationLength: filteredLengths.length > 0 ? Math.min(...filteredLengths) : 2
+    //         }));
+    //     }
+    // }
+
+    const findFreeRestaurantTables = () => {
+        const sendData = {
+            ...findFreeTables,
+            reservationStartTime: findFreeTables.reservationStartTime + ':00',
+        }
+        console.log(sendData)
+    }
 
 
 
@@ -81,26 +202,57 @@ function Reservations() {
                     </h2>
                 </div>
                 {findMode && (
-                    <div>
+                    <div className="text-xl mx-auto w-3/4 my-16 border-2 border-logotext rounded-2xl py-4 px-8 bg-amber25">
                         <h1 className="text-4xl text-logotext text-center mt-10 mb-4 font-serif">WYSZUKIWARKA TERMINÓW</h1>
-                        <div className="flex ">
+                        <div className="grid grid-cols-4 gap-10">
                             <div className="flex flex-col">
-                                <label>Liczba krzeseł:</label>
-                                <select value={findFreeTables.minNumberOfChairs} onChange={(e) => setFindFreeTables({...findFreeTables, minNumberOfChairs: Number(e.target.value)})}>
+                                <label className="text-xl text-logotext font-semibold text-center">Liczba krzeseł:</label>
+                                <select
+                                    className="border-2 border-logotext rounded-2xl p-3 text-lg mt-1 mb-4 outline-none focus:border-logotexthover bg-white"
+                                    value={findFreeTables.minNumberOfChairs} onChange={(e) => setFindFreeTables({...findFreeTables, minNumberOfChairs: Number(e.target.value)})}>
                                     {tablePriceList.map(item => (
-                                        <option key={item.id} value={item.numberOfChairs}>{item.numberOfChairs}</option>
+                                        <option className="text-center" key={item.id} value={item.numberOfChairs}>{item.numberOfChairs}</option>
                                     ))}
                                 </select>
                             </div>
                             <div className="flex flex-col">
-                                <label>Dzień rezerwacji:</label>
+                                <label className="text-xl text-logotext font-semibold text-center">Dzień rezerwacji:</label>
                                 <input
+                                    className="border-2 border-logotext rounded-2xl p-3 text-lg mt-1 mb-4 outline-none focus:border-logotexthover text-center bg-white"
                                     type="date"
                                     value={findFreeTables.reservationDay}
                                     min={getTomorrowDate()}
                                     onChange={(e) => setFindFreeTables({...findFreeTables, reservationDay: e.target.value})}
                                 />
                             </div>
+                            <div className="flex flex-col">
+                                <label className="text-xl text-logotext font-semibold text-center">Godzina rozpoczęcia:</label>
+                                <select
+                                    className="border-2 border-logotext rounded-2xl p-3 text-lg mt-1 mb-4 outline-none focus:border-logotexthover bg-white"
+                                    value={findFreeTables.reservationStartTime}
+                                    onChange={(e) => setFindFreeTables({...findFreeTables, reservationStartTime: e.target.value})}>
+                                    {reservationHours.map(hour => (
+                                        <option className="text-center" key={hour} value={hour}>{hour}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex flex-col">
+                                <label className="text-xl text-logotext font-semibold text-center">Czas trwania rezerwacji:</label>
+                                <select
+                                    className="border-2 border-logotext rounded-2xl p-3 text-lg mt-1 mb-4 outline-none focus:border-logotexthover bg-white"
+                                    value={findFreeTables.reservationLength}
+                                    onChange={(e) => setFindFreeTables({...findFreeTables, reservationLength: Number(e.target.value)})}>
+                                    {reservationLengths.map(hours => (
+                                        <option className="text-center" key={hours} value={hours}>{hours}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex justify-center items-center">
+                            <button className="w-1/3 bg-white tracking-wide px-10 py-4 border-2 border-logotext text-logotext text-xl rounded-2xl hover:bg-logotext hover:text-white  cursor-pointer font-semibold"
+                                    onClick={() => findFreeRestaurantTables()}>
+                                Wyszukaj wolne stoliki
+                            </button>
                         </div>
                     </div>
                 )}

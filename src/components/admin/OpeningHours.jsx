@@ -32,7 +32,6 @@ function OpeningHours() {
         for (let i = 0; i < 24; i++){
             const hour = i.toString().padStart(2, "0");
             hours.push(`${hour}:00`);
-            hours.push(`${hour}:30`);
         }
         return hours;
     }
