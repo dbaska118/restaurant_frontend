@@ -2,6 +2,8 @@ import {ToastContainer} from "react-toastify";
 import React, {useEffect} from "react";
 import {getAllTablePrice} from "../api/tablePriceAPI.js";
 import {getAllOpeningHours} from "../api/openingHoursAPI.js";
+import {findAllFreeRestuarantTables} from "../api/reservationAPI.js";
+import {Ban} from "lucide-react";
 
 
 function Reservations() {
@@ -17,11 +19,11 @@ function Reservations() {
     const [openHours, setOpenHours] = React.useState([]);
     const [reservationHours, setReservationHours] = React.useState([]);
     const [reservationLengths, setReservationLengths] = React.useState([]);
+    const [freeTables, setFreeTables] = React.useState(null);
 
     useEffect(() => {
         getAllTablePrice()
             .then(response => {
-                console.log(response);
                 setTablePriceList(response);
             })
             .catch(error => {
@@ -33,7 +35,6 @@ function Reservations() {
         getAllOpeningHours()
             .then(result => {
                setOpenHours(result);
-               console.log(result);
             })
             .catch(error => {
                 console.log(error);
@@ -130,63 +131,48 @@ function Reservations() {
         return tomorrow.toISOString().split('T')[0];
     };
 
-    // const calculateReservationStart = () => {
-    //     const selectedDay = new Date(findFreeTables.reservationDay);
-    //     const dayIndex = selectedDay.getDay() === 0 ? 7 : selectedDay.getDay();
-    //     const openDay = openHours.find(day => day.dayOrder === dayIndex);
-    //
-    //     if(!openDay) {
-    //         return;
-    //     }
-    //
-    //
-    //     const openHour = parseInt(openDay.openTime.split(':')[0]);
-    //     const closeHour = parseInt(openDay.closeTime.split(':')[0]);
-    //
-    //     const timeSlots = []
-    //     const interval = 2
-    //     for (let hour = openHour; hour < closeHour; hour += interval) {
-    //         if(hour + interval > closeHour) {
-    //             break;
-    //         }
-    //         const formattedHour = hour < 10 ? '0' + hour + ':00' : hour + ":00";
-    //         timeSlots.push(formattedHour)
-    //     }
-    //     setReservationHours(timeSlots);
-    // }
-    //
-    // const calculateReservationLength = () => {
-    //     const basicLength = [2,4,6,8]
-    //     const selectedDay = new Date(findFreeTables.reservationDay);
-    //     const dayIndex = selectedDay.getDay() === 0 ? 7 : selectedDay.getDay();
-    //     const openDay = openHours.find(day => day.dayOrder === dayIndex);
-    //
-    //    if(!openDay || !findFreeTables.reservationDay || !findFreeTables.reservationStartTime) {
-    //        setReservationLengths(basicLength)
-    //        return
-    //    }
-    //
-    //     const openHour = parseInt(findFreeTables.reservationStartTime.split(':')[0]);
-    //     const closeHour = parseInt(openDay.closeTime.split(':')[0]);
-    //     const hoursLeft = closeHour - openHour;
-    //
-    //     const filteredLengths = basicLength.filter(length => length <= hoursLeft);
-    //     setReservationLengths(filteredLengths);
-    //
-    //     if (!filteredLengths.includes(Number(findFreeTables.reservationLength))) {
-    //         setFindFreeTables(prev => ({
-    //             ...prev,
-    //             reservationLength: filteredLengths.length > 0 ? Math.min(...filteredLengths) : 2
-    //         }));
-    //     }
-    // }
-
-    const findFreeRestaurantTables = () => {
+    const findFreeRestaurantTables = async (e) => {
+        e.preventDefault();
         const sendData = {
             ...findFreeTables,
             reservationStartTime: findFreeTables.reservationStartTime + ':00',
         }
-        console.log(sendData)
+        try {
+            const response = await findAllFreeRestuarantTables(sendData);
+            setFreeTables(response);
+            console.log(response);
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
+    const renderTableCars = (resTable) =>{
+        const basePrice = tablePriceList.find(p => p.numberOfChairs === resTable.numberOfChairs).price;
+        const finalPrice = (basePrice / 2) * tablePriceList.length;
+        const isGreater = resTable.numberOfChairs > findFreeTables.minNumberOfChairs;
+
+        return (
+            <div className="text-center" key={resTable.id}>
+                <p>{resTable.name}</p>
+                <p>{new Date(freeTables.startTime).toLocaleString('pl-PL', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}
+                    {" - "}
+                    {new Date(freeTables.endTime).toLocaleString('pl-PL', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}
+                </p>
+                <p>Liczba miejsc: {resTable.numberOfChairs}</p>
+                <p>Cena: <span className={`${isGreater ? 'text-red-600 ' : 'text-gray-800'}`}> {finalPrice}</span></p>
+                <button>Zarezerwuj</button>
+            </div>
+        )
     }
 
 
@@ -250,10 +236,50 @@ function Reservations() {
                         </div>
                         <div className="flex justify-center items-center">
                             <button className="w-1/3 bg-white tracking-wide px-10 py-4 border-2 border-logotext text-logotext text-xl rounded-2xl hover:bg-logotext hover:text-white  cursor-pointer font-semibold"
-                                    onClick={() => findFreeRestaurantTables()}>
+                                    onClick={findFreeRestaurantTables}>
                                 Wyszukaj wolne stoliki
                             </button>
                         </div>
+                        {freeTables && (
+                            <div className="text-xl mx-auto my-16 py-4 px-8">
+                                <h1 className="text-4xl text-logotext text-center mt-10 mb-4 font-serif">DOSTĘPNE STOLIKI W WYBRANYM TERMINIE</h1>
+                                {freeTables.exactTables.length === 0 && (
+                                    <div className="flex flex-col items-center justify-center mt-6">
+                                        <Ban className="w-20 h-20 mb-5"/>
+                                        <h1 className="text-3xl font-semibold mb-4">Nie znaleziono stolików w podanym terminie!</h1>
+                                    </div>
+                                )}
+                                {freeTables.exactTables.length > 0 && (
+                                    <div className="grid grid-cols-3 gap-16 mx-auto w-3/4 mb-10">
+                                        {freeTables.exactTables.map((resTable) => renderTableCars(resTable))}
+                                    </div>
+                                )}
+                                <h1 className="text-4xl text-logotext text-center mt-20 mb-4 font-serif">WCZEŚNIEJSZE TERMINY</h1>
+                                {freeTables.earlierTables.length === 0 && (
+                                    <div className="flex flex-col items-center justify-center mt-6">
+                                        <Ban className="w-20 h-20 mb-5"/>
+                                        <h1 className="text-3xl font-semibold mb-4">Nie znaleziono stolików w podanym terminie!</h1>
+                                    </div>
+                                )}
+                                {freeTables.earlierTables.length > 0 && (
+                                    <div className="grid grid-cols-3 gap-16 mx-auto w-3/4 mb-10">
+                                        {freeTables.earlierTables.map((resTable) => renderTableCars(resTable))}
+                                    </div>
+                                )}
+                                <h1 className="text-4xl text-logotext text-center mt-20 mb-4 font-serif">PÓŹNIEJSZE TERMINY</h1>
+                                {freeTables.laterTables.length === 0 && (
+                                    <div className="flex flex-col items-center justify-center mt-6">
+                                        <Ban className="w-20 h-20 mb-5"/>
+                                        <h1 className="text-3xl font-semibold mb-4">Nie znaleziono stolików w podanym terminie!</h1>
+                                    </div>
+                                )}
+                                {freeTables.laterTables.length > 0 && (
+                                    <div className="grid grid-cols-3 gap-16 mx-auto w-3/4 mb-10">
+                                        {freeTables.laterTables.map((resTable) => renderTableCars(resTable))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
                 <div>
@@ -278,7 +304,7 @@ function Reservations() {
                             >
                                 <h2 className="text-3xl text-logotext group-hover:text-logotexthover">Stolik {price.numberOfChairs}-osobowy</h2>
                                 <p className="text-gray-700 group-hover:text-gray-600 text-lg mb-5">Idealny na {price.numberOfChairs === 1 ? 'spokojny wieczór' : price.numberOfChairs <= 2 ? 'romantyczną kolację' : 'spotkanie z przyjaciółmi'}</p>
-                                <h3 className="text-3xl font-semibold text-logotext group-hover:text-logotexthover">{price.price} zł</h3>
+                                <h3 className="text-3xl font-semibold text-logotext group-hover:text-logotexthover">{price.price} zł / 2h</h3>
                                 <p className="text-gray-700 group-hover:text-gray-600 text-lg mb-3">Koszt rezerwacji</p>
                                 <p className="text-lg text-logotext opacity-0 underline underline-offset-8 group-hover:opacity-100">Wybierz</p>
                             </button>

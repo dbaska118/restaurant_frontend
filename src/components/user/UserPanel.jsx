@@ -246,7 +246,8 @@ function UserPanel() {
                                         .map(reservation => (
                                         <div key={reservation.id} className="flex flex-col border border-footertext bg-amber-50 mt-6 p-3 rounded-xl text-2xl">
                                             <div className="text-center w-full mb-4">
-                                                <h1>{reservation.name}
+                                                <h1 className="text-3xl font-semibold my-2">{reservation.tableName}</h1>
+                                                <h1>
                                                     {"Data rezerwacji: "}
                                                     <span className="font-semibold">
                                                         {new Date(reservation.startTime).toLocaleString('pl-PL', {
