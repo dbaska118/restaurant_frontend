@@ -3,10 +3,13 @@ import React, {useEffect} from "react";
 import {getAllTablePrice} from "../api/tablePriceAPI.js";
 import {getAllOpeningHours} from "../api/openingHoursAPI.js";
 import {findAllFreeRestuarantTables} from "../api/reservationAPI.js";
-import {Ban} from "lucide-react";
+import {Ban, UsersRound, Wallet, Clock, TriangleAlert} from "lucide-react";
+import {useAuth} from "../AuthContext.jsx";
+import {useNavigate} from "react-router-dom";
 
 
 function Reservations() {
+    const navigate = useNavigate();
     const [tablePriceList, setTablePriceList] = React.useState([]);
     const [findFreeTables, setFindFreeTables] = React.useState({
         minNumberOfChairs: 0,
@@ -20,6 +23,10 @@ function Reservations() {
     const [reservationHours, setReservationHours] = React.useState([]);
     const [reservationLengths, setReservationLengths] = React.useState([]);
     const [freeTables, setFreeTables] = React.useState(null);
+    const { accessToken, user } = useAuth()
+    const [maxExactTables, setMaxExactTables] = React.useState(3);
+    const [maxEarlierTables, setMaxEarlierTables] = React.useState(3);
+    const [maxLaterTables, setMaxLaterTables] = React.useState(3);
 
     useEffect(() => {
         getAllTablePrice()
@@ -147,30 +154,70 @@ function Reservations() {
         }
     }
 
-    const renderTableCars = (resTable) =>{
+    const navigateToPage = (source) => {
+        window.scroll(0, 0)
+        navigate(source);
+    }
+
+    const renderTableCars = (resTable, hours) =>{
+        const reservationLength = (new Date(freeTables.endTime) - new Date(freeTables.startTime)) / (1000 * 60 * 60);
         const basePrice = tablePriceList.find(p => p.numberOfChairs === resTable.numberOfChairs).price;
-        const finalPrice = (basePrice / 2) * tablePriceList.length;
+        const finalPrice = (basePrice / 2) * reservationLength;
         const isGreater = resTable.numberOfChairs > findFreeTables.minNumberOfChairs;
 
+        const startTime = new Date(freeTables.startTime);
+        const endTime = new Date(freeTables.endTime);
+        startTime.setHours(startTime.getHours() + hours);
+        endTime.setHours(endTime.getHours() + hours);
+
+
+
         return (
-            <div className="text-center" key={resTable.id}>
-                <p>{resTable.name}</p>
-                <p>{new Date(freeTables.startTime).toLocaleString('pl-PL', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                })}
-                    {" - "}
-                    {new Date(freeTables.endTime).toLocaleString('pl-PL', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}
-                </p>
-                <p>Liczba miejsc: {resTable.numberOfChairs}</p>
-                <p>Cena: <span className={`${isGreater ? 'text-red-600 ' : 'text-gray-800'}`}> {finalPrice}</span></p>
-                <button>Zarezerwuj</button>
+            <div className="text-center border-2 border-logotext  rounded-2xl bg-white text-xl p-6 shadow-xl  hover:shadow-2xl hover:scale-105" key={resTable.id}>
+                <p className=" text-2xl font-semibold text-logotext ">{resTable.name}</p>
+                <div className="border-b border-t border-logotext py-3 mt-2 mb-4 ">
+                    <div className="flex items-center justify-start gap-5 mb-2">
+                        <Clock className="text-logotext"/>
+                        <p>{startTime.toLocaleString('pl-PL', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}
+                            {" - "}
+                            {endTime.toLocaleString('pl-PL', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}
+                        </p>
+                    </div>
+                    <div className="flex items-center justify-start gap-5 mb-2">
+                        <UsersRound className="text-logotext"/>
+                        <p>Liczba miejsc: {resTable.numberOfChairs}</p>
+                    </div>
+                    <div className="flex items-center justify-start gap-5 mb-2">
+                        <Wallet className="text-logotext"/>
+                        <p>Cena: <span className={`${isGreater ? 'text-red-600 ' : 'text-gray-800'}`}> {finalPrice}</span></p>
+                    </div>
+                    <div className={`flex items-center justify-start  gap-5 ${isGreater ? 'visible opacity-100' : 'invisible opacity-0'}`}>
+                        <TriangleAlert className="text-red-600 w-6 h-6"/>
+                        <p className="text-red-600">Większy stolik (dopłata)</p>
+                    </div>
+                </div>
+                {(!user || !accessToken )  && (
+                    <button
+                        onClick={() => navigateToPage("/login")}
+                        className="bg-gray-100 tracking-wide w-full px-2 py-2 border-2 border-logotext text-logotext rounded-2xl hover:bg-logotext hover:text-white  cursor-pointer font-semibold">
+                        Zaloguj się, aby zarezerować
+                    </button>
+                )}
+                {(user && accessToken) && (
+                    <button
+                        className="bg-gray-100 tracking-wide w-full px-2 py-2 border-2 border-logotext text-logotext rounded-2xl hover:bg-logotext hover:text-white  cursor-pointer font-semibold">
+                        Dokonaj rezerwacji
+                    </button>
+                )}
             </div>
         )
     }
@@ -250,11 +297,17 @@ function Reservations() {
                                     </div>
                                 )}
                                 {freeTables.exactTables.length > 0 && (
-                                    <div className="grid grid-cols-3 gap-16 mx-auto w-3/4 mb-10">
-                                        {freeTables.exactTables.map((resTable) => renderTableCars(resTable))}
+                                    <div className="grid grid-cols-3 gap-10 mx-auto mb-10">
+                                        {freeTables.exactTables.slice(0, maxExactTables).map((resTable) => renderTableCars(resTable, 0))}
+
+                                        {freeTables.exactTables.length > maxExactTables && (
+                                            <div className="col-span-3 flex items-center justify-center">
+                                                <button onClick={() => setMaxExactTables(maxExactTables + 3)} className="shadow-xl bg-white tracking-wide px-10 py-4 border-2 border-logotext text-logotext text-xl rounded-2xl hover:bg-logotext hover:text-white  cursor-pointer font-semibold">Zobacz więcej wyników</button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
-                                <h1 className="text-4xl text-logotext text-center mt-20 mb-4 font-serif">WCZEŚNIEJSZE TERMINY</h1>
+                                <h1 className="text-4xl text-logotext text-center mt-20 mb-4 font-serif">WCZEŚNIEJSZY TERMIN</h1>
                                 {freeTables.earlierTables.length === 0 && (
                                     <div className="flex flex-col items-center justify-center mt-6">
                                         <Ban className="w-20 h-20 mb-5"/>
@@ -262,11 +315,17 @@ function Reservations() {
                                     </div>
                                 )}
                                 {freeTables.earlierTables.length > 0 && (
-                                    <div className="grid grid-cols-3 gap-16 mx-auto w-3/4 mb-10">
-                                        {freeTables.earlierTables.map((resTable) => renderTableCars(resTable))}
+                                    <div className="grid grid-cols-3 gap-10 mx-auto mb-10">
+                                        {freeTables.earlierTables.slice(0, maxEarlierTables).map((resTable) => renderTableCars(resTable, -2))}
+
+                                        {freeTables.earlierTables.length > maxEarlierTables && (
+                                            <div className="col-span-3 flex items-center justify-center">
+                                                <button onClick={() => setMaxEarlierTables(maxEarlierTables + 3)} className="shadow-xl bg-white tracking-wide px-10 py-4 border-2 border-logotext text-logotext text-xl rounded-2xl hover:bg-logotext hover:text-white  cursor-pointer font-semibold">Zobacz więcej wyników</button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
-                                <h1 className="text-4xl text-logotext text-center mt-20 mb-4 font-serif">PÓŹNIEJSZE TERMINY</h1>
+                                <h1 className="text-4xl text-logotext text-center mt-20 mb-4 font-serif">PÓŹNIEJSZY TERMIN</h1>
                                 {freeTables.laterTables.length === 0 && (
                                     <div className="flex flex-col items-center justify-center mt-6">
                                         <Ban className="w-20 h-20 mb-5"/>
@@ -274,8 +333,14 @@ function Reservations() {
                                     </div>
                                 )}
                                 {freeTables.laterTables.length > 0 && (
-                                    <div className="grid grid-cols-3 gap-16 mx-auto w-3/4 mb-10">
-                                        {freeTables.laterTables.map((resTable) => renderTableCars(resTable))}
+                                    <div className="grid grid-cols-3 gap-10 mx-auto mb-10">
+                                        {freeTables.laterTables.slice(0, maxLaterTables).map((resTable) => renderTableCars(resTable, 2))}
+
+                                        {freeTables.laterTables.length > maxLaterTables && (
+                                            <div className="col-span-3 flex items-center justify-center">
+                                                <button onClick={() => setMaxLaterTables(maxLaterTables + 3)} className=" shadow-xl bg-white tracking-wide px-10 py-4 border-2 border-logotext text-logotext text-xl rounded-2xl hover:bg-logotext hover:text-white  cursor-pointer font-semibold">Zobacz więcej wyników</button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>

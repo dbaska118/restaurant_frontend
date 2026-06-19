@@ -236,7 +236,7 @@ function UserPanel() {
                                 <div className="flex flex-col items-center justify-center mt-30">
                                     <Ban className="w-44 h-44 mb-10"/>
                                     <h1 className="text-4xl font-semibold mb-4">Nie znaleziono rezerwacji!</h1>
-                                    <p className="text-3xl">Przejdź do <button onClick={() => navigateToPage("/dishes")} className="cursor-pointer hover:text-logotexthover">podstrony rezerwacji</button>, aby dokonać nowej.</p>
+                                    <p className="text-3xl">Przejdź do <button onClick={() => navigateToPage("/reservations")} className="cursor-pointer hover:text-logotexthover">podstrony rezerwacji</button>, aby dokonać nowej.</p>
                                 </div>
                             )}
                             {reservations.length > 0 && (
