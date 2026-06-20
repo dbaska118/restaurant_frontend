@@ -6,6 +6,7 @@ import {findAllFreeRestuarantTables} from "../api/reservationAPI.js";
 import {Ban, UsersRound, Wallet, Clock, TriangleAlert} from "lucide-react";
 import {useAuth} from "../AuthContext.jsx";
 import {useNavigate} from "react-router-dom";
+import {getClientBalance} from "../api/userAPI.js";
 
 
 function Reservations() {
@@ -27,6 +28,23 @@ function Reservations() {
     const [maxExactTables, setMaxExactTables] = React.useState(3);
     const [maxEarlierTables, setMaxEarlierTables] = React.useState(3);
     const [maxLaterTables, setMaxLaterTables] = React.useState(3);
+    const [selectedTable, setSelectedTable] = React.useState(null);
+    const [confirmReservation, setConfirmReservation] = React.useState(false);
+    const [balance, setBalance] = React.useState(0);
+    const [selectedHoursOffset, setSelectedHoursOffset] = React.useState(0);
+
+    useEffect(() => {
+        if (!user?.email) return;
+
+        getClientBalance(user.email)
+            .then((response) => {
+                setBalance(response);
+            })
+            .catch((error) => {
+                console.log(error)
+                setBalance(undefined);
+            })
+    }, [user?.email])
 
     useEffect(() => {
         getAllTablePrice()
@@ -214,6 +232,7 @@ function Reservations() {
                 )}
                 {(user && accessToken) && (
                     <button
+                        onClick={() => selectTable(resTable, hours)}
                         className="bg-gray-100 tracking-wide w-full px-2 py-2 border-2 border-logotext text-logotext rounded-2xl hover:bg-logotext hover:text-white  cursor-pointer font-semibold">
                         Dokonaj rezerwacji
                     </button>
@@ -222,6 +241,91 @@ function Reservations() {
         )
     }
 
+    const renderReservationConfirm = () => {
+        const reservationLength = (new Date(freeTables.endTime) - new Date(freeTables.startTime)) / (1000 * 60 * 60);
+        const basePrice = tablePriceList.find(p => p.numberOfChairs === selectedTable.numberOfChairs).price;
+        const finalPrice = (basePrice / 2) * reservationLength;
+        const isGreater = selectedTable.numberOfChairs > findFreeTables.minNumberOfChairs;
+
+        const startTime = new Date(freeTables.startTime);
+        const endTime = new Date(freeTables.endTime);
+        startTime.setHours(startTime.getHours() + selectedHoursOffset);
+        endTime.setHours(endTime.getHours() + selectedHoursOffset);
+        const isEnoughFunds = balance >= finalPrice;
+
+
+        return (
+            <div>
+                <div className="flex justify-between">
+                    <h3 className=" text-3xl font-semibold text-logotext text-center ">{selectedTable.name}</h3>
+                    <h3 className=" text-3xl font-semibold text-logotext text-center ">Twoje saldo: {balance} zł</h3>
+                </div>
+                <div className="border-b border-t border-logotext py-3 mt-2 mb-4 ">
+                    <div className="flex items-center justify-start gap-5 mb-2">
+                        <Clock className="text-logotext"/>
+                        <p>{startTime.toLocaleString('pl-PL', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}
+                            {" - "}
+                            {endTime.toLocaleString('pl-PL', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}
+                        </p>
+                    </div>
+                    <div className="flex items-center justify-start gap-5 mb-2">
+                        <UsersRound className="text-logotext"/>
+                        <p>Liczba miejsc: {selectedTable.numberOfChairs}</p>
+                    </div>
+                    <div className="flex items-center justify-start gap-5 mb-2">
+                        <Wallet className="text-logotext"/>
+                        <p>Cena: <span className={`${isGreater ? 'text-red-600 ' : 'text-gray-800'}`}> {finalPrice}</span></p>
+                    </div>
+                    <div className={`flex items-center justify-start  gap-5 ${isGreater ? 'visible opacity-100' : 'invisible opacity-0'}`}>
+                        <TriangleAlert className="text-red-600 w-6 h-6"/>
+                        <p className="text-red-600">Większy stolik (dopłata)</p>
+                    </div>
+                </div>
+                <div className="flex flex-col">
+                    {isEnoughFunds && (
+                        <p className="text-lg mb-4">Dokonując rezerwacji akceptujesz postanowienia <span className="cursor-pointer underline underline-offset-6 hover:text-logotext">regulaminu.</span></p>
+                    )}
+                    {!isEnoughFunds && (
+                        <p className="text-lg mb-4">Niewystarczające środki na koncie. Doładuj konto w <button className="cursor-pointer underline underline-offset-6 hover:text-logotext" onClick={() => navigateToPage("/userpanel")}>zakładce profilu.</button></p>
+                    )}
+                    <button type="submit" disabled={!isEnoughFunds} className={`mb-4 shadow-xl tracking-wide px-10 py-4 border-2 text-xl rounded-2xl font-semibold 
+                    ${isEnoughFunds ? 'bg-white border-logotext text-logotext hover:bg-logotext hover:text-white  cursor-pointer' 
+                        : 'bg-gray-200 border-gray-500 text-gray-500 cursor-not-allowed'}`}>
+                        Dokonaj rezerwacji
+                    </button>
+                    <button className=" shadow-xl bg-white tracking-wide px-10 py-4 border-2 border-logotext text-logotext text-xl rounded-2xl hover:bg-logotext hover:text-white  cursor-pointer font-semibold"
+                            onClick={cancelReservationConfirm}>Anuluj
+                    </button>
+                </div>
+
+            </div>
+        )
+    }
+
+    const selectTable = (resTable, hours) => {
+        setSelectedHoursOffset(hours);
+        setSelectedTable(resTable);
+        setConfirmReservation(true);
+    }
+
+    const handleAddReservation = async () => {
+
+    }
+
+    const cancelReservationConfirm =  () => {
+        setSelectedHoursOffset(0);
+        setSelectedTable(null);
+        setConfirmReservation(false);
+    }
 
 
     return (
@@ -376,6 +480,14 @@ function Reservations() {
                         ))}
                     </div>
                 </div>
+                {confirmReservation && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                        <form onSubmit={handleAddReservation} className="w-full max-w-[750px] bg-white flex flex-col border-3  border-logotext rounded-xl pt-6 pb-12  px-12 text-2xl">
+                            <h3 className="text-4xl font-bold mb-6 text-center">Dokonaj rezerwacji</h3>
+                            {renderReservationConfirm()}
+                        </form>
+                    </div>
+                )}
             </div>
         </div>
     )
