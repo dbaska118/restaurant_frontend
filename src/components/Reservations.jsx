@@ -1,8 +1,8 @@
-import {ToastContainer} from "react-toastify";
+import {toast, ToastContainer} from "react-toastify";
 import React, {useEffect} from "react";
 import {getAllTablePrice} from "../api/tablePriceAPI.js";
 import {getAllOpeningHours} from "../api/openingHoursAPI.js";
-import {findAllFreeRestuarantTables} from "../api/reservationAPI.js";
+import {createReservationClient, findAllFreeRestuarantTables} from "../api/reservationAPI.js";
 import {Ban, UsersRound, Wallet, Clock, TriangleAlert} from "lucide-react";
 import {useAuth} from "../AuthContext.jsx";
 import {useNavigate} from "react-router-dom";
@@ -30,8 +30,9 @@ function Reservations() {
     const [maxLaterTables, setMaxLaterTables] = React.useState(3);
     const [selectedTable, setSelectedTable] = React.useState(null);
     const [confirmReservation, setConfirmReservation] = React.useState(false);
-    const [balance, setBalance] = React.useState(0);
+    const [balance, setBalance] = React.useState(undefined);
     const [selectedHoursOffset, setSelectedHoursOffset] = React.useState(0);
+    const [createReservationFormData, setCreateReservationFormData] = React.useState({});
 
     useEffect(() => {
         if (!user?.email) return;
@@ -157,11 +158,22 @@ function Reservations() {
     };
 
     const findFreeRestaurantTables = async (e) => {
-        e.preventDefault();
+        if (e && typeof e.preventDefault === 'function') {
+            e.preventDefault();
+        }
+
+        setMaxExactTables(3);
+        setMaxEarlierTables(3);
+        setMaxLaterTables(3);
+
+        const startTime = findFreeTables.reservationStartTime;
+        const safeStartTime = startTime.length === 5 ? `${startTime}:00` : startTime;
+
         const sendData = {
             ...findFreeTables,
-            reservationStartTime: findFreeTables.reservationStartTime + ':00',
-        }
+            reservationStartTime: safeStartTime,
+        };
+
         try {
             const response = await findAllFreeRestuarantTables(sendData);
             setFreeTables(response);
@@ -188,10 +200,8 @@ function Reservations() {
         startTime.setHours(startTime.getHours() + hours);
         endTime.setHours(endTime.getHours() + hours);
 
-
-
         return (
-            <div className="text-center border-2 border-logotext  rounded-2xl bg-white text-xl p-6 shadow-xl  hover:shadow-2xl hover:scale-105" key={resTable.id}>
+            <div className="text-center border-2 border-logotext  rounded-2xl bg-white text-xl p-6 shadow-xl  hover:shadow-2xl hover:scale-105" key={`${resTable.id}-${hours}`}>
                 <p className=" text-2xl font-semibold text-logotext ">{resTable.name}</p>
                 <div className="border-b border-t border-logotext py-3 mt-2 mb-4 ">
                     <div className="flex items-center justify-start gap-5 mb-2">
@@ -253,12 +263,11 @@ function Reservations() {
         endTime.setHours(endTime.getHours() + selectedHoursOffset);
         const isEnoughFunds = balance >= finalPrice;
 
-
         return (
             <div>
                 <div className="flex justify-between">
                     <h3 className=" text-3xl font-semibold text-logotext text-center ">{selectedTable.name}</h3>
-                    <h3 className=" text-3xl font-semibold text-logotext text-center ">Twoje saldo: {balance} zł</h3>
+                    <h3 className=" text-3xl font-semibold text-logotext text-center ">Twoje saldo: {balance === undefined ? 'Błąd pobrania salda' : `${Number(balance).toFixed(2)} zł`} </h3>
                 </div>
                 <div className="border-b border-t border-logotext py-3 mt-2 mb-4 ">
                     <div className="flex items-center justify-start gap-5 mb-2">
@@ -295,7 +304,7 @@ function Reservations() {
                         <p className="text-lg mb-4">Dokonując rezerwacji akceptujesz postanowienia <span className="cursor-pointer underline underline-offset-6 hover:text-logotext">regulaminu.</span></p>
                     )}
                     {!isEnoughFunds && (
-                        <p className="text-lg mb-4">Niewystarczające środki na koncie. Doładuj konto w <button className="cursor-pointer underline underline-offset-6 hover:text-logotext" onClick={() => navigateToPage("/userpanel")}>zakładce profilu.</button></p>
+                        <p className="text-lg mb-4">Niewystarczające środki na koncie. Doładuj konto w <button type="button" className="cursor-pointer underline underline-offset-6 hover:text-logotext" onClick={() => navigateToPage("/userpanel")}>zakładce profilu.</button></p>
                     )}
                     <button type="submit" disabled={!isEnoughFunds} className={`mb-4 shadow-xl tracking-wide px-10 py-4 border-2 text-xl rounded-2xl font-semibold 
                     ${isEnoughFunds ? 'bg-white border-logotext text-logotext hover:bg-logotext hover:text-white  cursor-pointer' 
@@ -315,10 +324,65 @@ function Reservations() {
         setSelectedHoursOffset(hours);
         setSelectedTable(resTable);
         setConfirmReservation(true);
+
+        const startTime = new Date(freeTables.startTime);
+        const endTime = new Date(freeTables.endTime);
+        startTime.setHours(startTime.getHours() + hours);
+        endTime.setHours(endTime.getHours() + hours);
+
+        setCreateReservationFormData({
+            email: user?.email,
+            tableId: resTable.id,
+            startTime: startTime,
+            endTime: endTime,
+        });
     }
 
-    const handleAddReservation = async () => {
+    const handleAddReservation = async (e) => {
+        e.preventDefault();
+        const formData = {
+            ...createReservationFormData,
+            startTime: formatToBackendLocal(createReservationFormData.startTime),
+            endTime: formatToBackendLocal(createReservationFormData.endTime)
+        };
 
+        try {
+            await createReservationClient(formData);
+            toast.success("Dokonano rezerwacji, kod sprawdzisz w zakładce profilu!", {
+                className: 'min-w-[450px]',
+            });
+        }
+        catch (error) {
+            console.error(error);
+            if(error.status === 400) {
+                toast.error('Brak wystarczający środków na koncie!', {
+                    className: 'min-w-[450px]',
+                });
+                try {
+                    const newBalance = await getClientBalance(user.email)
+                    setBalance(newBalance);
+                }
+                catch (error) {
+                    console.error(error);
+                    setBalance(undefined);
+                }
+
+            }
+            else if (error.status === 409) {
+                toast.error('W tym czasie istnieje inna rezerwacja!', {
+                    className: 'min-w-[450px]',
+                });
+                await findFreeRestaurantTables()
+            }
+            else {
+                toast.error('Błąd tworzenia rezerwacji!', {
+                    className: 'min-w-[450px]',
+                });
+            }
+        }
+        setSelectedHoursOffset(0);
+        setSelectedTable(null);
+        setConfirmReservation(false);
     }
 
     const cancelReservationConfirm =  () => {
@@ -326,6 +390,20 @@ function Reservations() {
         setSelectedTable(null);
         setConfirmReservation(false);
     }
+
+    const formatToBackendLocal = (dateObj) => {
+        if (!dateObj || !(dateObj instanceof Date)) return null;
+
+        const pad = (num) => String(num).padStart(2, '0');
+        const year = dateObj.getFullYear();
+        const month = pad(dateObj.getMonth() + 1);
+        const day = pad(dateObj.getDate());
+        const hours = pad(dateObj.getHours());
+        const minutes = pad(dateObj.getMinutes());
+        const seconds = pad(dateObj.getSeconds());
+
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+    };
 
 
     return (

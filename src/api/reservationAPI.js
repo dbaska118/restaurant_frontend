@@ -30,3 +30,14 @@ export const findAllFreeRestuarantTables = async (data) => {
         throw error;
     }
 }
+
+export const createReservationClient = async (data) => {
+    try {
+        const response = await api.post(`/reservation/client`, data);
+        return response.data;
+    }
+    catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
