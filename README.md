@@ -6,6 +6,9 @@
 - **Tailwind CSS**
 - **Axios**
 
+# Źródło wykorzystanych zdjęć:
+- https://www.magnific.com/pl
+
 ## Przykłady implementacji:
 ### 1. Widok Publiczny (Gość / Użytkownik niezalogowany)
 <p align="center">

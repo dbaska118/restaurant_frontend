@@ -1,14 +1,16 @@
 import {getAllRestaurantTable, updateRestaurantTableStatus} from "../../api/restaurantTableAPI.js";
 import React, {useEffect} from "react";
 import {toast, ToastContainer} from "react-toastify";
-import {Ban, NotebookPen, Trash} from "lucide-react";
+import {Ban, NotebookPen, TriangleAlert} from "lucide-react";
+import {getNextReservations} from "../../api/reservationAPI.js";
 
-function RestaurantTableStatusEdit() {
+function RestaurantTableStatusEdit(locales) {
     const [restaurantTable, setRestaurantTable] = React.useState([]);
     const [chairsGroup, setChairsGroup] = React.useState([]);
     const [filterStatus, setFilterStatus] = React.useState("all");
     const [filterChairs, setFilterChairs] = React.useState("all");
     const [filterName, setFilterName] = React.useState("");
+    const [nextReservations, setNextReservations] = React.useState([]);
 
     useEffect(() => {
         getAllRestaurantTable()
@@ -16,6 +18,17 @@ function RestaurantTableStatusEdit() {
                 setRestaurantTable(response);
                 const seatGroups = [...new Set(response.map(t => t.numberOfChairs))].sort((a, b) => a - b);
                 setChairsGroup(seatGroups);
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+    },[])
+
+    useEffect(() => {
+        getNextReservations()
+            .then((response) => {
+               console.log(response);
+               setNextReservations(response);
             })
             .catch((error) => {
                 console.log(error);
@@ -55,8 +68,6 @@ function RestaurantTableStatusEdit() {
                 });
             }
         }
-
-        console.log(formData);
     }
 
     const filteredTables = restaurantTable.filter(table => {
@@ -65,6 +76,38 @@ function RestaurantTableStatusEdit() {
         const matchName = table.name.toLowerCase().includes(filterName.toLowerCase());
         return matchesStatus && matchChairs && matchName;
     })
+
+    const renderReservationInfo = (table) => {
+        const reservation = nextReservations.find((reservation) => reservation.tableId=== table.id)
+
+        if(!reservation) {
+            return ( <p className="text-xl text-gray-600 mt-2">Rezerwacja: Brak</p>)
+        }
+
+        const startTime = new Date(reservation.startTime);
+        const endTime = new Date(reservation.endTime);
+
+        return (
+            <div className="flex items-center gap-2 mt-2">
+                <TriangleAlert className="text-yellow-600 w-5 h-5"/>
+                <p className="text-xl text-black">Rezerwacja: </p>
+                <p className="text-xl text-black">
+                    {startTime.toLocaleString('pl-PL', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}
+                    {" - "}
+                    {endTime.toLocaleString('pl-PL', {
+                        hour: '2-digit',
+                        minute: '2-digit'}
+                    )}
+                </p>
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -147,7 +190,7 @@ function RestaurantTableStatusEdit() {
                                                                     <div className="flex flex-col">
                                                                         <p className={`text-2xl text-right ${table.status === "FREE" ? `text-green-600` : `text-red-600`} `}>{table.status === "FREE" ? "Wolny" : "Zajęty"}</p>
                                                                         <h3 className="text-3xl font-semibold text-center">{table.name}</h3>
-                                                                        <p className="text-2xl text-gray-600 mt-2">Rezerwacja: Brak</p>
+                                                                        {renderReservationInfo(table)}
                                                                         <div className="flex justify-center mt-4 pb-2">
                                                                             <button onClick={() => updateStatus(table)} className={`cursor-pointer flex items-center   ${table.status === "FREE" ? `text-green-600 hover:text-green-700` : `text-red-600 hover:text-red-700`} `}
                                                                                     type="button">
