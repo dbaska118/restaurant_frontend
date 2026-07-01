@@ -19,6 +19,7 @@ import Reservations from "./components/Reservations.jsx";
 import Layout from "./components/Layout.jsx";
 import EmployeePanel from "./components/employee/EmployeePanel.jsx";
 import RestaurantTableStatusEdit from "./components/employee/RestaurantTableStatusEdit.jsx";
+import ReservationStart from "./components/employee/ReservationStart.jsx";
 
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
                         <Route path="/admin/restaurantTable" element={<RestaurantTableEdit />} />
                         <Route path="/employeepanel" element={<EmployeePanel/>} />
                         <Route path="/employee/restaurantablestatus" element={<RestaurantTableStatusEdit />} />
+                        <Route path="/employee/reservationstart" element={<ReservationStart />} />
                     </Routes>
                 </Layout>
             </Router>

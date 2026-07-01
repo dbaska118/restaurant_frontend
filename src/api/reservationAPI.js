@@ -53,3 +53,13 @@ export const  getNextReservations = async () => {
         throw error;
     }
 }
+
+export const getTodayReservationsByEmail = async (email) => {
+    try {
+        const response = await api.get(`/reservation/employee/${email}`);
+        return response.data;
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
